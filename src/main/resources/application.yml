@@ -1,0 +1,31 @@
+spring:
+  main:
+    allow-circular-references: true
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQL94Dialect
+    properties:
+      hibernate:
+        hbm2ddl:
+        #          auto: validate
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        transaction:
+          jta:
+            platform: enable
+    hibernate:
+      ddl-auto: create #update
+    generate-ddl: true
+    show-sql: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/account_db
+    username: postgres
+    password: postgres
+    hikari:
+      schema: account_schema
+      connection-init-sql: CREATE SCHEMA IF NOT EXISTS account_schema
+      connection-timeout: 10000
+#  kafka:
+#    bootstrap-servers: localhost:9092
+#app:
+#  kafka:
+#    accountChanges: ""
+#    groupId: ""
