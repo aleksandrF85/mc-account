@@ -23,6 +23,8 @@ spring:
       schema: account_schema
       connection-init-sql: CREATE SCHEMA IF NOT EXISTS account_schema
       connection-timeout: 10000
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.xml
 #  kafka:
 #    bootstrap-servers: localhost:9092
 #app:
