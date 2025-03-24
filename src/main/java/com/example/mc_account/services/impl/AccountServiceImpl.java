@@ -33,9 +33,9 @@ public class AccountServiceImpl implements AccountService {
                         PageRequest.of(filter.getSize(), filter.getPage())).getContent();
     }
     @Override
-    public List<Account> search(AccountSearchDto filter, PageFilter pageFilter) {
+    public List<Account> search(AccountSearchDto searchFilter, PageFilter pageFilter) {
         return repository.findAll(
-                        AccountSpecification.withFilter(filter),
+                        AccountSpecification.withFilter(searchFilter),
                         PageRequest.of(
                                 pageFilter.getSize(),
                                 pageFilter.getPage(),
@@ -45,10 +45,15 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public List<Account> findByIds(List<Long> ids, PageFilter pageFilter) {
 
-        return repository.findAllById(ids, PageRequest.of(
-                pageFilter.getPage(),
-                pageFilter.getPage(),
-                Sort.by(pageFilter.getSort()))).getContent();
+        AccountSearchDto searchFilter = new AccountSearchDto();
+        searchFilter.setIds(ids);
+
+        return repository.findAll(
+                AccountSpecification.withFilter(searchFilter),
+                PageRequest.of(
+                        pageFilter.getSize(),
+                        pageFilter.getPage(),
+                        Sort.by(pageFilter.getSort()))).getContent();
     }
     @Override
     public List<Account> findAll() {
@@ -57,6 +62,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public List<Account> findAll(PageFilter pageFilter){
+
         return repository.findAll(PageRequest.of(
                         pageFilter.getSize(),
                         pageFilter.getPage(),
@@ -65,6 +71,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account findById(Long id) {
+
         return repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(MessageFormat.format(
                         "Пользователь с таким ID {0} не найден!", id

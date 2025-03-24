@@ -76,7 +76,7 @@ public class AccountController {
     }
 
     @GetMapping
-    public ResponseEntity<String> getAllAccounts(@Valid PageFilter pageFilter) {
+    public ResponseEntity<String> getAllAccounts(@RequestParam @Valid PageFilter pageFilter) {
 
         accountServiceImpl.findAll(pageFilter).stream()
                 .map(accountMapper::accountToDto)
@@ -98,8 +98,6 @@ public class AccountController {
     @PostMapping("/searchByFilter")
     public ResponseEntity<List<AccountDto>> searchAccountByFilter(@RequestBody @Valid AccountByFilterDto request) {
 
-        //TODO уточнить какой должен быть запрос GET???
-
         return ResponseEntity.ok(
                 accountServiceImpl.filterBy(request).stream()
                         .map(accountMapper::accountToDto)
@@ -113,7 +111,8 @@ public class AccountController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<AccountDto>> searchAccount(@RequestBody AccountSearchDto request, @Valid PageFilter pageFilter) {
+    public ResponseEntity<List<AccountDto>> searchAccount(@RequestParam AccountSearchDto request,
+                                                          @RequestParam @Valid PageFilter pageFilter) {
 
         return ResponseEntity.ok(
                 accountServiceImpl.search(request, pageFilter).stream()
@@ -130,7 +129,8 @@ public class AccountController {
     }
 
     @GetMapping("/accountIds")
-    public ResponseEntity<List<AccountDto>> getAccountIds(@RequestBody List<Long> ids, @Valid PageFilter pageFilter) {
+    public ResponseEntity<List<AccountDto>> getAccountIds(@RequestParam List<Long> ids,
+                                                          @RequestParam @Valid PageFilter pageFilter) {
 
         return ResponseEntity.ok(
                 accountServiceImpl.findByIds(ids, pageFilter).stream()
