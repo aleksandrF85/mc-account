@@ -3,36 +3,36 @@ package com.example.mc_account.dto;
 import com.example.mc_account.model.RoleType;
 import com.example.mc_account.model.StatusCode;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
-@Data
-@NoArgsConstructor
-public class AccountDto {
+import java.util.Set;
+import java.util.UUID;
 
-    private Long id;
+
+@Data
+public class AccountResponseDto  {
+    private UUID id;
+    private String firstName;
+    private String lastName;
     private String email;
+    private String password;
+    private final Set<RoleType> role;
     private String phone;
     private String photo;
+    private String profileCover;
     private String about;
     private String city;
     private String country;
-    private String token;
     private StatusCode statusCode;
-    private String firstName;
-    private String lastName;
     private OffsetDateTime regDate;
     private OffsetDateTime birthDate;
     private String messagePermission;
     private OffsetDateTime lastOnlineTime;
-    private boolean isOnline;
-    private boolean isBlocked;
-    private boolean isDeleted;
-    private String photoId;
-    private String photoName;
-    private RoleType role;
+    private String emojiStatus;
     private OffsetDateTime createdOn;
     private OffsetDateTime updatedOn;
-    private String password;
-
+    private OffsetDateTime deletionTimestamp;
+    private boolean deleted;
+    private boolean blocked;
+    private boolean isOnline;
 }
