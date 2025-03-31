@@ -11,6 +11,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @AllArgsConstructor
@@ -22,16 +23,36 @@ public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private Long id;
+    private UUID id;
+
+    @Column(name = "firstName", nullable = false)
+    private String firstName;
+
+    @Column(name = "lastName", nullable = false)
+    private String lastName;
 
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "email")
+    @Column(name = "password", nullable = false)
+    private String password;
+
+
+    @ElementCollection(targetClass = RoleType.class, fetch = FetchType.EAGER)
+    @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "role", nullable = false)
+    @ToString.Exclude
+    @Enumerated(EnumType.STRING)
+    private Set<RoleType> role = new HashSet<>();
+
+    @Column(name = "phone")
     private String phone;
 
     @Column(name = "photo")
     private String photo;
+
+    @Column(name = "profileCover")
+    private String profileCover;
 
     @Column(name = "about")
     private String about;
@@ -42,18 +63,9 @@ public class Account {
     @Column(name = "country")
     private String country;
 
-    @Column(name = "token")
-    private String token;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "statusCode")
     private StatusCode statusCode;
-
-    @Column(name = "firstName", nullable = false)
-    private String firstName;
-
-    @Column(name = "lastName", nullable = false)
-    private String lastName;
 
     @Column(name = "regDate")
     private OffsetDateTime regDate;
@@ -67,26 +79,9 @@ public class Account {
     @Column(name = "lastOnlineTime")
     private OffsetDateTime lastOnlineTime;
 
-    @Column(name = "isOnline")
-    private boolean isOnline;
 
-    @Column(name = "isBlocked")
-    private boolean isBlocked;
-
-    @Column(name = "isDeleted")
-    private boolean isDeleted;
-
-    @Column(name = "photoId")
-    private String photoId;
-
-    @Column(name = "photoName")
-    private String photoName;
-    @ElementCollection(targetClass = RoleType.class, fetch = FetchType.EAGER)
-    @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "roles", nullable = false)
-    @ToString.Exclude
-    @Enumerated(EnumType.STRING)
-    private Set<RoleType> roles = new HashSet<>();
+    @Column(name = "emojiStatus")
+    private String emojiStatus;
 
     @Column(name = "createdOn")
     @CreationTimestamp
@@ -96,6 +91,15 @@ public class Account {
     @UpdateTimestamp
     private OffsetDateTime updatedOn;
 
-    @Column(name = "password", nullable = false)
-    private String password;
+    @Column(name = "deletionTimestamp")
+    private OffsetDateTime deletionTimestamp;
+
+    @Column(name = "isDeleted")
+    private boolean deleted;
+    @Column(name = "isBlocked")
+    private boolean blocked;
+
+    @Column(name = "isOnline")
+    private boolean isOnline;
+
 }
