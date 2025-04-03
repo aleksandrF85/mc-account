@@ -21,7 +21,7 @@ import java.util.UUID;
 public class Account {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", nullable = false)
     private UUID id;
 
@@ -37,9 +37,8 @@ public class Account {
     @Column(name = "password", nullable = false)
     private String password;
 
-
     @ElementCollection(targetClass = RoleType.class, fetch = FetchType.EAGER)
-    @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "account_id"))
     @Column(name = "role", nullable = false)
     @ToString.Exclude
     @Enumerated(EnumType.STRING)

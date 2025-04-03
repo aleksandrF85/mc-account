@@ -6,7 +6,7 @@ import java.time.OffsetDateTime;
 
 
 @Data
-public class AccountUpdateDto{
+public class AccountUpdateDto {
     private String firstName;
     private String lastName;
     private String phone;

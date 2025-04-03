@@ -6,12 +6,14 @@ import com.example.mc_account.dto.AccountMeDto;
 import com.example.mc_account.dto.AccountResponseDto;
 import com.example.mc_account.dto.AccountUpdateDto;
 import com.example.mc_account.dto.filter.AccountSearchDto;
+import com.example.mc_account.dto.filter.PageFilter;
 import com.example.mc_account.mapper.AccountMapper;
+import com.example.mc_account.model.Account;
 import com.example.mc_account.model.StatusCode;
 import com.example.mc_account.services.AccountService;
+import com.example.mc_account.utils.JwtTokenUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,19 +32,26 @@ public class AccountController {
     public final AccountService accountServiceImpl;
 
     @GetMapping("/me")
-    public ResponseEntity<AccountMeDto> getCurrentAccount(){
+    public ResponseEntity<AccountMeDto> getCurrentAccount(@RequestHeader(value = "Authorization") String bearerToken) {
 
-        UUID id = UUID.randomUUID(); //TODO получить id из AuthenticationPrincipal
+        //TODO Уточнить способ приема токена и его расшифровки
+        String email = JwtTokenUtils.parseJwtToken(bearerToken).get("sub").toString();
+        Account account = accountServiceImpl.findByEmail(email);
+
+        accountServiceImpl.isOnline(account.getId(), true);
+        //TODO Уточнить когда помечать аккаунт online (при входе?)
 
         return ResponseEntity.ok(
-                accountMapper.accountToMeDto(
-                        accountServiceImpl.findById(id)));
+                accountMapper.accountToMeDto(account));
     }
 
     @PutMapping("/me")
-    public ResponseEntity<AccountMeDto> updateCurrentAccount(@RequestBody AccountUpdateDto request){
+    public ResponseEntity<AccountMeDto> updateCurrentAccount(@RequestHeader(value = "Authorization") String bearerToken,
+                                                             @RequestBody AccountUpdateDto request) {
 
-        UUID id = UUID.randomUUID(); //TODO получить id из AuthenticationPrincipal
+        //TODO Уточнить способ приема токена и его расшифровки
+        String email = JwtTokenUtils.parseJwtToken(bearerToken).get("sub").toString();
+        UUID id = accountServiceImpl.findByEmail(email).getId();
 
         return ResponseEntity.ok(
                 accountMapper.accountToMeDto(
@@ -50,10 +59,13 @@ public class AccountController {
     }
 
     @DeleteMapping("/me")
-    public ResponseEntity<Void> markAccountAsDeleted(){
+    public ResponseEntity<Void> markAccountAsDeleted(@RequestHeader(value = "Authorization") String bearerToken) {
 
-        UUID id = UUID.randomUUID(); //TODO получить id из AuthenticationPrincipal
-        //TODO Пометить текущий аккаунт как удаленный
+        //TODO Уточнить способ приема токена и его расшифровки
+        String email = JwtTokenUtils.parseJwtToken(bearerToken).get("sub").toString();
+        UUID id = accountServiceImpl.findByEmail(email).getId();
+
+        accountServiceImpl.deleteById(id);
 
         return ResponseEntity.ok().build();
     }
@@ -82,6 +94,8 @@ public class AccountController {
         // о завершении сессии вебсокета у аккаунта: как
         // флаг перехода в статус offline
 
+        accountServiceImpl.isOnline(uuid, false);
+
         return ResponseEntity.ok().build();
     }
 
@@ -94,7 +108,7 @@ public class AccountController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> markAccountAsDeletedById(@PathVariable UUID id) {
 
-        //TODO Пометить аккаунт как удаленный по ID
+        accountServiceImpl.deleteById(id);
 
         return ResponseEntity.ok().build();
     }
@@ -102,7 +116,7 @@ public class AccountController {
     @PatchMapping("/{id}")
     public ResponseEntity<Void> markAccountAsBlockedById(@PathVariable UUID id) {
 
-        //TODO Пометить аккаунт как заблокированный по ID
+        accountServiceImpl.blockById(id);
 
         return ResponseEntity.ok().build();
     }
@@ -115,28 +129,28 @@ public class AccountController {
 
     @GetMapping("/search")
     public ResponseEntity<List<AccountDataDto>> searchAccounts(@RequestParam AccountSearchDto request,
-                                                                  @RequestParam Pageable pageable) {
+                                                               @RequestParam PageFilter pageFilter) {
 
-        //TODO Уточнить дополнительные параметры поиска и ответ
+        //TODO Уточнить дополнительные параметры поиска и ответ (должен быть Page?)
 
 
         return ResponseEntity.ok(
-                accountServiceImpl.search(request, pageable).stream()
+                accountServiceImpl.search(request, pageFilter).stream()
                         .map(accountMapper::accountToDataDto)
                         .collect(Collectors.toList()));
     }
 
     @GetMapping("/search/statusCode")
     public ResponseEntity<List<AccountDataDto>> searchByStatusCode(@RequestParam StatusCode statusCode,
-                                                                              @RequestParam Pageable pageable) {
+                                                                   @RequestParam PageFilter pageFilter) {
 
-        //TODO Уточнить дополнительные параметры поиска и ответ
+        //TODO Уточнить дополнительные параметры поиска и ответ (должен быть Page?)
 
         AccountSearchDto request = new AccountSearchDto();
         request.setStatusCode(statusCode);
 
         return ResponseEntity.ok(
-                accountServiceImpl.search(request, pageable).stream()
+                accountServiceImpl.search(request, pageFilter).stream()
                         .map(accountMapper::accountToDataDto)
                         .collect(Collectors.toList()));
     }

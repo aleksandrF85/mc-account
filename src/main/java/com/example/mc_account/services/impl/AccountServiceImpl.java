@@ -2,6 +2,7 @@ package com.example.mc_account.services.impl;
 
 
 import com.example.mc_account.dto.filter.AccountSearchDto;
+import com.example.mc_account.dto.filter.PageFilter;
 import com.example.mc_account.exception.AlreadyExistException;
 import com.example.mc_account.model.Account;
 import com.example.mc_account.reposirory.AccountRepository;
@@ -10,10 +11,11 @@ import com.example.mc_account.services.AccountService;
 import com.example.mc_account.utils.BeanUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,25 +25,17 @@ public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository repository;
 
-    //    @Override
-//    public List<Account> filterBy(AccountByFilterDto filter) {
-//
-//        return repository.findAll(
-//                AccountSpecification.withFilter(filter.getAccountSearchDto()),
-//                        PageRequest.of(filter.getSize(), filter.getPage())).getContent();
-//    }
     @Override
-    public List<Account> search(AccountSearchDto searchFilter, Pageable pageable) {
+    public List<Account> search(AccountSearchDto searchFilter, PageFilter pageFilter) {
         return repository.findAll(
-                        AccountSpecification.withFilter(searchFilter),
-                        pageable).getContent();
+                AccountSpecification.withFilter(searchFilter),
+                PageRequest.of(pageFilter.getPageSize(), pageFilter.getPageNumber())).getContent();
     }
 
     @Override
     public List<Account> findAll() {
         return repository.findAll();
     }
-
 
     @Override
     public Account findByEmail(String email) {
@@ -50,6 +44,7 @@ public class AccountServiceImpl implements AccountService {
                         "Пользователь с таким email {0} не найден!", email
                 )));
     }
+
     @Override
     public Account findById(UUID id) {
 
@@ -84,7 +79,34 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public void deleteById(UUID id) {
 
-        repository.deleteById(id);
+        Account account = findById(id);
+        account.setDeleted(true);
+        account.setDeletionTimestamp(OffsetDateTime.now());
+        repository.save(account);
+    }
+
+    @Override
+    public void blockById(UUID id) {
+
+        Account account = findById(id);
+        account.setBlocked(true);
+        repository.save(account);
+    }
+
+    @Override
+    public void isOnline(UUID id, boolean isOnline) {
+
+        Account account = findById(id);
+
+        if (isOnline) {
+            account.setOnline(true);
+            account.setLastOnlineTime(null);
+        } else {
+            account.setLastOnlineTime(OffsetDateTime.now());
+            account.setOnline(false);
+        }
+
+        repository.save(account);
     }
 
 }

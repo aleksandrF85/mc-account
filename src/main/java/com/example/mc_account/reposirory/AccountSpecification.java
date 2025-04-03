@@ -22,7 +22,7 @@ public interface AccountSpecification {
                 .and(byAge(accountFilter.getAgeFrom(), accountFilter.getAgeTo()));
     }
 
-    static  Specification<Account> byAccountIds(List<Long> ids) {
+    static Specification<Account> byAccountIds(List<Long> ids) {
 
         return ((root, query, criteriaBuilder) -> {
             if (ids == null || ids.isEmpty()) {
@@ -32,6 +32,7 @@ public interface AccountSpecification {
         });
     }
 
+    //TODO уточнить параметры поиска по Автору
     static Specification<Account> buAuthor(String author) {
         return ((root, query, criteriaBuilder) -> {
             if (author == null || author.isEmpty()) {

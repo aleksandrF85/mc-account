@@ -1,8 +1,8 @@
 package com.example.mc_account.services;
 
 import com.example.mc_account.dto.filter.AccountSearchDto;
+import com.example.mc_account.dto.filter.PageFilter;
 import com.example.mc_account.model.Account;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.UUID;
@@ -10,7 +10,7 @@ import java.util.UUID;
 public interface AccountService {
 
 
-    List<Account> search(AccountSearchDto filter, Pageable pageable);
+    List<Account> search(AccountSearchDto filter, PageFilter pageFilter);
 
     List<Account> findAll();
 
@@ -21,6 +21,10 @@ public interface AccountService {
     Account update(Account account, UUID id);
 
     void deleteById(UUID id);
+
+    void blockById(UUID id);
+
+    void isOnline(UUID id, boolean isOnline);
 
     Account findByEmail(String email);
 }

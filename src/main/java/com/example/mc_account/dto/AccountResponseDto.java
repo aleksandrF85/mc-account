@@ -10,13 +10,13 @@ import java.util.UUID;
 
 
 @Data
-public class AccountResponseDto  {
+public class AccountResponseDto {
+    private final Set<RoleType> role;
     private UUID id;
     private String firstName;
     private String lastName;
     private String email;
     private String password;
-    private final Set<RoleType> role;
     private String phone;
     private String photo;
     private String profileCover;
