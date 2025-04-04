@@ -6,12 +6,12 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.time.OffsetDateTime;
-import java.util.UUID;
+import java.time.LocalDateTime;
 
 @Data
 public class AccountMeDto implements Serializable {
-    private UUID id;
+
+    private String id; //TODO получать данные при авторизации
     @NotBlank(message = "Имя должно быть указано")
     @Size(min = 3, max = 20, message = "Имя не должно быть меньше {min} и больше {max} символов!")
     private String firstName;
@@ -30,14 +30,14 @@ public class AccountMeDto implements Serializable {
     private String city;
     private String country;
     private StatusCode statusCode;
-    private OffsetDateTime regDate;
-    private OffsetDateTime birthDate;
+    private LocalDateTime regDate;
+    private LocalDateTime birthDate;
     private String messagePermission;
-    private OffsetDateTime lastOnlineTime;
+    private LocalDateTime lastOnlineTime;
     private String emojiStatus;
-    private OffsetDateTime createdOn;
-    private OffsetDateTime updatedOn;
-    private OffsetDateTime deletionTimestamp;
+    private LocalDateTime createdOn;
+    private LocalDateTime updatedOn;
+    private LocalDateTime deletionTimestamp;
     private boolean blocked;
     private boolean deleted;
     private boolean isOnline;

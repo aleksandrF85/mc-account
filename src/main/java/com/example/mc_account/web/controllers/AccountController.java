@@ -87,49 +87,49 @@ public class AccountController {
                                 accountMapper.meDtoToAccount(request))));
     }
 
-    @PostMapping("/lastAction/{uuid}")
-    public ResponseEntity<Void> lastAction(@PathVariable UUID uuid) {
+    @PostMapping("/lastAction/{id}")
+    public ResponseEntity<Void> lastAction(@PathVariable String id) {
 
         //TODO Прием UUID от сервиса Dialogs через Webclient
         // о завершении сессии вебсокета у аккаунта: как
         // флаг перехода в статус offline
 
-        accountServiceImpl.isOnline(uuid, false);
+        accountServiceImpl.isOnline(UUID.fromString(id), false);
 
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AccountDataDto> getAccountById(@PathVariable UUID id) {
+    public ResponseEntity<AccountDataDto> getAccountById(@PathVariable String id) {
 
-        return ResponseEntity.ok(accountMapper.accountToDataDto(accountServiceImpl.findById(id)));
+        return ResponseEntity.ok(accountMapper.accountToDataDto(accountServiceImpl.findById(UUID.fromString(id))));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> markAccountAsDeletedById(@PathVariable UUID id) {
+    public ResponseEntity<Void> markAccountAsDeletedById(@PathVariable String id) {
 
-        accountServiceImpl.deleteById(id);
+        accountServiceImpl.deleteById(UUID.fromString(id));
 
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Void> markAccountAsBlockedById(@PathVariable UUID id) {
+    public ResponseEntity<Void> markAccountAsBlockedById(@PathVariable String id) {
 
-        accountServiceImpl.blockById(id);
+        accountServiceImpl.blockById(UUID.fromString(id));
 
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/total")
-    public ResponseEntity<Integer> getTotalAccountsCount(@PathVariable UUID id) {
+    public ResponseEntity<Integer> getTotalAccountsCount() {
 
         return ResponseEntity.ok(accountServiceImpl.findAll().size());
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<AccountDataDto>> searchAccounts(@RequestParam AccountSearchDto request,
-                                                               @RequestParam PageFilter pageFilter) {
+    public ResponseEntity<List<AccountDataDto>> searchAccounts(@RequestBody AccountSearchDto request,
+                                                               @Valid PageFilter pageFilter) {
 
         //TODO Уточнить дополнительные параметры поиска и ответ (должен быть Page?)
 
@@ -142,7 +142,7 @@ public class AccountController {
 
     @GetMapping("/search/statusCode")
     public ResponseEntity<List<AccountDataDto>> searchByStatusCode(@RequestParam StatusCode statusCode,
-                                                                   @RequestParam PageFilter pageFilter) {
+                                                                   @Valid PageFilter pageFilter) {
 
         //TODO Уточнить дополнительные параметры поиска и ответ (должен быть Page?)
 

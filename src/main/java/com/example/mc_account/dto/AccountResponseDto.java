@@ -4,15 +4,14 @@ import com.example.mc_account.model.RoleType;
 import com.example.mc_account.model.StatusCode;
 import lombok.Data;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.Set;
-import java.util.UUID;
 
 
 @Data
 public class AccountResponseDto {
     private final Set<RoleType> role;
-    private UUID id;
+    private String id;
     private String firstName;
     private String lastName;
     private String email;
@@ -24,14 +23,14 @@ public class AccountResponseDto {
     private String city;
     private String country;
     private StatusCode statusCode;
-    private OffsetDateTime regDate;
-    private OffsetDateTime birthDate;
+    private LocalDateTime regDate;
+    private LocalDateTime birthDate;
     private String messagePermission;
-    private OffsetDateTime lastOnlineTime;
+    private LocalDateTime lastOnlineTime;
     private String emojiStatus;
-    private OffsetDateTime createdOn;
-    private OffsetDateTime updatedOn;
-    private OffsetDateTime deletionTimestamp;
+    private LocalDateTime createdOn;
+    private LocalDateTime updatedOn;
+    private LocalDateTime deletionTimestamp;
     private boolean deleted;
     private boolean blocked;
     private boolean isOnline;

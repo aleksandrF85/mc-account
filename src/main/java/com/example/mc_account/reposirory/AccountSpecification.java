@@ -90,7 +90,14 @@ public interface AccountSpecification {
     static Specification<Account> isDeleted(boolean deleted) {
 
         return ((root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("isDeleted"), deleted));
+                criteriaBuilder.equal(root.get("deleted"), deleted));
+//        return ((root, query, criteriaBuilder) ->
+//        {
+//            if (deleted){
+//                return criteriaBuilder.isTrue(root.get("deleted"));
+//            }
+//            return criteriaBuilder.isFalse(root.get("deleted"));
+//        });
     }
 
     static Specification<Account> byAge(Integer ageFrom, Integer ageTo) {
@@ -100,7 +107,7 @@ public interface AccountSpecification {
 
         return ((root, query, criteriaBuilder) -> {
 
-            if (ageFrom == null && ageTo == null) {
+            if (ageFrom == null && ageTo == null || ageFrom == 0 && ageTo == 0) {
                 return null;
             }
             if (ageFrom == null || ageFrom <= 0) {

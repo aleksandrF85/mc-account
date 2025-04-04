@@ -15,7 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,7 +29,7 @@ public class AccountServiceImpl implements AccountService {
     public List<Account> search(AccountSearchDto searchFilter, PageFilter pageFilter) {
         return repository.findAll(
                 AccountSpecification.withFilter(searchFilter),
-                PageRequest.of(pageFilter.getPageSize(), pageFilter.getPageNumber())).getContent();
+                PageRequest.of(pageFilter.getPageNumber(), pageFilter.getPageSize())).getContent();
     }
 
     @Override
@@ -81,7 +81,7 @@ public class AccountServiceImpl implements AccountService {
 
         Account account = findById(id);
         account.setDeleted(true);
-        account.setDeletionTimestamp(OffsetDateTime.now());
+        account.setDeletionTimestamp(LocalDateTime.now());
         repository.save(account);
     }
 
@@ -102,7 +102,7 @@ public class AccountServiceImpl implements AccountService {
             account.setOnline(true);
             account.setLastOnlineTime(null);
         } else {
-            account.setLastOnlineTime(OffsetDateTime.now());
+            account.setLastOnlineTime(LocalDateTime.now());
             account.setOnline(false);
         }
 
