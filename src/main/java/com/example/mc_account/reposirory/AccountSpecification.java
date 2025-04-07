@@ -2,6 +2,7 @@ package com.example.mc_account.reposirory;
 
 import com.example.mc_account.dto.filter.AccountSearchDto;
 import com.example.mc_account.model.Account;
+import com.example.mc_account.model.StatusCode;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.OffsetDateTime;
@@ -14,14 +15,24 @@ public interface AccountSpecification {
                 .and(buAuthor(accountFilter.getAuthor()))
                 .and(byFirstName(accountFilter.getFirstName()))
                 .and(byLastName(accountFilter.getLastName()))
-                .and(byBirthDate(accountFilter.getBirthDateFrom(), accountFilter.getBirthDateTo()))
                 .and(byCity(accountFilter.getCity()))
                 .and(byCountry(accountFilter.getCountry()))
-                .and(isBlocked(accountFilter.isBlocked()))
+                .and(byStatusCode(accountFilter.getStatusCode()))
                 .and(isDeleted(accountFilter.isDeleted()))
                 .and(byAge(accountFilter.getAgeFrom(), accountFilter.getAgeTo()));
     }
 
+    static Specification<Account> byAccountIds(List<Long> ids) {
+
+        return ((root, query, criteriaBuilder) -> {
+            if (ids == null || ids.isEmpty()) {
+                return null;
+            }
+            return root.get("id").in(ids);
+        });
+    }
+
+    //TODO уточнить параметры поиска по Автору
     static Specification<Account> buAuthor(String author) {
         return ((root, query, criteriaBuilder) -> {
             if (author == null || author.isEmpty()) {
@@ -49,21 +60,6 @@ public interface AccountSpecification {
         });
     }
 
-    static Specification<Account> byBirthDate(OffsetDateTime birthDateFrom, OffsetDateTime birthDateTo) {
-        return ((root, query, criteriaBuilder) -> {
-            if (birthDateFrom == null && birthDateTo == null) {
-                return null;
-            }
-            if (birthDateFrom == null) {
-                return criteriaBuilder.lessThanOrEqualTo(root.get("birthDate"), birthDateTo);
-            }
-            if (birthDateTo == null) {
-                return criteriaBuilder.greaterThanOrEqualTo(root.get("birthDate"), birthDateFrom);
-            }
-            return criteriaBuilder.between(root.get("birthDate"), birthDateFrom, birthDateTo);
-        });
-    }
-
     static Specification<Account> byCity(String city) {
         return ((root, query, criteriaBuilder) -> {
             if (city == null || city.isEmpty()) {
@@ -82,26 +78,26 @@ public interface AccountSpecification {
         });
     }
 
-    static  Specification<Account>  byAccountIds(List<Long> ids) {
-
+    static Specification<Account> byStatusCode(StatusCode statusCode) {
         return ((root, query, criteriaBuilder) -> {
-            if (ids == null || ids.isEmpty()) {
+            if (statusCode == null) {
                 return null;
             }
-            return root.get("id").in(ids);
+            return criteriaBuilder.equal(root.get("statusCode"), statusCode);
         });
     }
 
     static Specification<Account> isDeleted(boolean deleted) {
 
         return ((root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("isDeleted"), deleted));
-    }
-
-    static Specification<Account> isBlocked(boolean blocked) {
-
-        return ((root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("isBlocked"), blocked));
+                criteriaBuilder.equal(root.get("deleted"), deleted));
+//        return ((root, query, criteriaBuilder) ->
+//        {
+//            if (deleted){
+//                return criteriaBuilder.isTrue(root.get("deleted"));
+//            }
+//            return criteriaBuilder.isFalse(root.get("deleted"));
+//        });
     }
 
     static Specification<Account> byAge(Integer ageFrom, Integer ageTo) {
@@ -111,7 +107,7 @@ public interface AccountSpecification {
 
         return ((root, query, criteriaBuilder) -> {
 
-            if (ageFrom == null && ageTo == null) {
+            if (ageFrom == null && ageTo == null || ageFrom == 0 && ageTo == 0) {
                 return null;
             }
             if (ageFrom == null || ageFrom <= 0) {

@@ -17,8 +17,11 @@ public class BeanUtils {
         for (Field field : fields) {
             field.setAccessible(true);
             Object value = field.get(source);
-
-            if (value != null && !value.toString().isEmpty() && !value.equals(List.of())) {
+            // TODO проверить логику копирования полей boolean
+            if (value != null &&
+                    !value.toString().isEmpty() &&
+                    !value.equals(List.of()) &&
+                    !value.getClass().getSimpleName().equals("boolean")) {
                 field.set(destination, value);
             }
         }

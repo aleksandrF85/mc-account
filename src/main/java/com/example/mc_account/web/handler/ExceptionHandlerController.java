@@ -18,7 +18,7 @@ import java.util.List;
 public class ExceptionHandlerController {
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> exceptionHandler (Exception ex){
+    public ResponseEntity<ErrorResponse> exceptionHandler(Exception ex) {
 
         if (ex instanceof EntityNotFoundException) {
             return ResponseEntity
@@ -49,7 +49,6 @@ public class ExceptionHandlerController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ErrorResponse(ex.getMessage()));
         }
-
 
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

@@ -9,7 +9,7 @@ public class PageFilterValidator implements ConstraintValidator<PageFilterValida
 
     @Override
     public boolean isValid(PageFilter value, ConstraintValidatorContext context) {
-        return !ObjectUtils.anyNull(value.getSize(), value.getPage(), value.getSort()) &&
-                value.getSize() > 0 && value.getPage() >= 0;
+        return !ObjectUtils.anyNull(value.getPageSize(), value.getPageNumber()) &&
+                value.getPageSize() > 0 && value.getPageNumber() >= 0;
     }
 }

@@ -1,19 +1,25 @@
 package com.example.mc_account.web.controllers;
 
 
-import com.example.mc_account.dto.*;
-import com.example.mc_account.dto.filter.AccountByFilterDto;
+import com.example.mc_account.dto.AccountDataDto;
+import com.example.mc_account.dto.AccountMeDto;
+import com.example.mc_account.dto.AccountResponseDto;
+import com.example.mc_account.dto.AccountUpdateDto;
 import com.example.mc_account.dto.filter.AccountSearchDto;
 import com.example.mc_account.dto.filter.PageFilter;
 import com.example.mc_account.mapper.AccountMapper;
 import com.example.mc_account.model.Account;
+import com.example.mc_account.model.StatusCode;
 import com.example.mc_account.services.AccountService;
+import com.example.mc_account.utils.JwtTokenUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -25,116 +31,128 @@ public class AccountController {
 
     public final AccountService accountServiceImpl;
 
-    @PutMapping("/recovery")
-    public ResponseEntity<String> recoveryUserAccount(@RequestBody AccountRecoveryRq request){
-
-        //TODO написать метод для восстановления аккаунта
-
-        return ResponseEntity.ok("string");
-    }
-
     @GetMapping("/me")
-    public ResponseEntity<AccountDto> getUserAccount(){
+    public ResponseEntity<AccountMeDto> getCurrentAccount(@RequestHeader(value = "Authorization") String bearerToken) {
 
-        Long id = 1L; //TODO получить id из AuthenticationPrincipal
+        //TODO Уточнить способ приема токена и его расшифровки
+        String email = JwtTokenUtils.parseJwtToken(bearerToken).get("sub").toString();
+        Account account = accountServiceImpl.findByEmail(email);
 
-        return ResponseEntity.ok(accountMapper.accountToDto(accountServiceImpl.findById(id)));
+        accountServiceImpl.isOnline(account.getId(), true);
+        //TODO Уточнить когда помечать аккаунт online (при входе?)
+
+        return ResponseEntity.ok(
+                accountMapper.accountToMeDto(account));
     }
 
     @PutMapping("/me")
-    public ResponseEntity<AccountDto> updateUserAccount(@RequestBody AccountDto request){
+    public ResponseEntity<AccountMeDto> updateCurrentAccount(@RequestHeader(value = "Authorization") String bearerToken,
+                                                             @RequestBody AccountUpdateDto request) {
 
+        //TODO Уточнить способ приема токена и его расшифровки
+        String email = JwtTokenUtils.parseJwtToken(bearerToken).get("sub").toString();
+        UUID id = accountServiceImpl.findByEmail(email).getId();
 
-        Long id = 1L; //TODO получить id из AuthenticationPrincipal
-
-        return ResponseEntity.ok(accountMapper.accountToDto(accountServiceImpl.update(accountMapper.dtoToAccount(id, request))));
+        return ResponseEntity.ok(
+                accountMapper.accountToMeDto(
+                        accountServiceImpl.update(accountMapper.updateDtoToAccount(request), id)));
     }
 
     @DeleteMapping("/me")
-    public ResponseEntity<String> deleteUserAccount(){
+    public ResponseEntity<Void> markAccountAsDeleted(@RequestHeader(value = "Authorization") String bearerToken) {
 
-        Long id = 1L; //TODO получить id из AuthenticationPrincipal
+        //TODO Уточнить способ приема токена и его расшифровки
+        String email = JwtTokenUtils.parseJwtToken(bearerToken).get("sub").toString();
+        UUID id = accountServiceImpl.findByEmail(email).getId();
+
         accountServiceImpl.deleteById(id);
-
-        return ResponseEntity.ok("Account with id " + id + " deleted.");
-    }
-
-    @PutMapping("/block/{id}")
-    public ResponseEntity<String> blockAccountById(@PathVariable Long id) {
-
-        //TODO написать метод блокировки аккаунта
-
-        return ResponseEntity.ok("string");
-    }
-
-    @DeleteMapping("/block/{id}")
-    public ResponseEntity<String> unblockAccountById(@PathVariable Long id) {
-
-        //TODO написать метод разблокировки аккаунта
-
-        return ResponseEntity.ok("string");
-    }
-
-    @GetMapping
-    public ResponseEntity<String> getAllAccounts(@Valid PageFilter pageFilter) {
-
-        accountServiceImpl.findAll(pageFilter).stream()
-                .map(accountMapper::accountToDto)
-                .collect(Collectors.toList());
-
-        //TODO уточнить тело ответа
-
-        return ResponseEntity.ok("Success!");
-    }
-
-    @PostMapping
-    public ResponseEntity<Void> createAccount(@RequestBody AccountDto request) {
-
-        accountServiceImpl.create(accountMapper.dtoToAccount(request));
 
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/searchByFilter")
-    public ResponseEntity<List<AccountDto>> searchAccountByFilter(@RequestBody @Valid AccountByFilterDto request) {
-
-        //TODO уточнить какой должен быть запрос GET???
+    @GetMapping
+    public ResponseEntity<AccountResponseDto> getAccount(@RequestParam String email) {
 
         return ResponseEntity.ok(
-                accountServiceImpl.filterBy(request).stream()
-                        .map(accountMapper::accountToDto)
-                        .collect(Collectors.toList()));
+                accountMapper.accountToResponseDto(
+                        accountServiceImpl.findByEmail(email)));
+    }
+
+    @PostMapping
+    public ResponseEntity<AccountMeDto> createAccount(@RequestBody @Valid AccountMeDto request) {
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                accountMapper.accountToMeDto(
+                        accountServiceImpl.create(
+                                accountMapper.meDtoToAccount(request))));
+    }
+
+    @PostMapping("/lastAction/{id}")
+    public ResponseEntity<Void> lastAction(@PathVariable String id) {
+
+        //TODO Прием UUID от сервиса Dialogs через Webclient
+        // о завершении сессии вебсокета у аккаунта: как
+        // флаг перехода в статус offline
+
+        accountServiceImpl.isOnline(UUID.fromString(id), false);
+
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AccountDto> getAccountById(@PathVariable Long id) {
+    public ResponseEntity<AccountDataDto> getAccountById(@PathVariable String id) {
 
-        return ResponseEntity.ok(accountMapper.accountToDto(accountServiceImpl.findById(id)));
+        return ResponseEntity.ok(accountMapper.accountToDataDto(accountServiceImpl.findById(UUID.fromString(id))));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> markAccountAsDeletedById(@PathVariable String id) {
+
+        accountServiceImpl.deleteById(UUID.fromString(id));
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Void> markAccountAsBlockedById(@PathVariable String id) {
+
+        accountServiceImpl.blockById(UUID.fromString(id));
+
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/total")
+    public ResponseEntity<Integer> getTotalAccountsCount() {
+
+        return ResponseEntity.ok(accountServiceImpl.findAll().size());
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<AccountDto>> searchAccount(@RequestBody AccountSearchDto request, @Valid PageFilter pageFilter) {
+    public ResponseEntity<List<AccountDataDto>> searchAccounts(@RequestBody AccountSearchDto request,
+                                                               @Valid PageFilter pageFilter) {
+
+        //TODO Уточнить дополнительные параметры поиска и ответ (должен быть Page?)
+
 
         return ResponseEntity.ok(
                 accountServiceImpl.search(request, pageFilter).stream()
-                        .map(accountMapper::accountToDto)
+                        .map(accountMapper::accountToDataDto)
                         .collect(Collectors.toList()));
     }
 
-    @GetMapping("/ids")
-    public ResponseEntity<String> getAllIds() {
+    @GetMapping("/search/statusCode")
+    public ResponseEntity<List<AccountDataDto>> searchByStatusCode(@RequestParam StatusCode statusCode,
+                                                                   @Valid PageFilter pageFilter) {
 
-        var ids = accountServiceImpl.findAll().stream().map(Account::getId).toList();
+        //TODO Уточнить дополнительные параметры поиска и ответ (должен быть Page?)
 
-        return ResponseEntity.ok("All account ID: " + ids);
-    }
-
-    @GetMapping("/accountIds")
-    public ResponseEntity<List<AccountDto>> getAccountIds(@RequestBody List<Long> ids, @Valid PageFilter pageFilter) {
+        AccountSearchDto request = new AccountSearchDto();
+        request.setStatusCode(statusCode);
 
         return ResponseEntity.ok(
-                accountServiceImpl.findByIds(ids, pageFilter).stream()
-                        .map(accountMapper::accountToDto)
+                accountServiceImpl.search(request, pageFilter).stream()
+                        .map(accountMapper::accountToDataDto)
                         .collect(Collectors.toList()));
     }
+
 }
