@@ -26,10 +26,23 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:/db/changelog/db.changelog-master.xml
+  application:
+    name: mc-account
 #  kafka:
 #    bootstrap-servers: localhost:9092
+eureka:
+  client:
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://${EUREKA-HOST:localhost}:8761/eureka/
+    fetch-registry: true
+  instance:
+    hostname: ${mc-account:localhost}
+    prefer-ip-address: true
+#    instance-id: ${spring.application.name}:${random.uuid}
 #app:
 #  kafka:
+#    userRegistration: ""
 #    accountChanges: ""
 #    groupId: ""
 server:

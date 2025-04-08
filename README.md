@@ -1,23 +1,29 @@
-## микросервис account-mc
-## по умолчанию запускается на http://localhost:8080/ (при необходимости поменять в docker-compose.yml)
+### микросервис account-mc
+### по умолчанию запускается на http://localhost:8080/ (при необходимости поменять в docker-compose.yml)
+
+### cd docker
+### docker-compose up
 
 
-## cd docker
-## docker-compose up
+# Получение информации о текущем аккаунте
+[//]: # (operationId: getCurrentAccount)
+### GET
 
-Получение информации о текущем аккаунте
-operationId: getCurrentAccount
-GET
+## /api/v1/account/me
 
-# /api/v1/account/me
+### RequestHeader
+- Authorization: "JwtToken"
 
-Обновление аккаунта
+# Обновление аккаунта
 operationId: updateAccountMe
-PUT
+### PUT
 
-# /api/v1/account/me
+## /api/v1/account/me
 
-RequestBody
+### RequestHeader
+- Authorization: "JwtToken"
+
+### RequestBody
 `{
 "firstName": "",
 "lastName": "",
@@ -30,29 +36,32 @@ RequestBody
 "emojiStatus": ""
 }`
 
-Пометить текущий аккаунт как удалённый
-operationId: markAccountAsDeleted
-DELETE
+# Пометить текущий аккаунт как удалённый
+[//]: # (operationId: markAccountAsDeleted)
+### DELETE
 
-# /api/v1/account/me
+## /api/v1/account/me
 
-Получение аккаунта по email
-operationId: getAccount
-GET
+### RequestHeader
+- Authorization: "JwtToken"
 
-# /api/v1/account
+# Получение аккаунта по email
+[//]: # (operationId: getAccount)
+### GET
 
-RequestParam
+## /api/v1/account
+
+### RequestParam
 
 - email: "String"
 
-Создание нового аккаунта
-operationId: createAccount
-POST
+# Создание нового аккаунта
+[//]: # (operationId: createAccount)
+### POST
 
-# /api/v1/account
+## /api/v1/account
 
-RequestBody
+### RequestBody
 `{
 "id": "",
 "firstName": "",
@@ -79,56 +88,55 @@ RequestBody
 "isOnline": true
 }`
 
-'Прием UUID от сервиса Dialogs через Webclient о завершении сессии вебсокета у аккаунта: как флаг перехода в статус
-offline'
-operationId: receiveUUIDFromPath
-POST
+# 'Прием UUID от сервиса Dialogs через Webclient о завершении сессии вебсокета у аккаунта: как флаг перехода в статус offline'
+[//]: # (operationId: receiveUUIDFromPath)
+### POST
 
-# /api/v1/account/lastAction/{id}
+## /api/v1/account/lastAction/{id}
 
-PathVariable
+### PathVariable
 - id: "String" (UUID)
 
-Получение аккаунта по ID
-operationId: getAccountById
-GET
+# Получение аккаунта по ID
+[//]: # (operationId: getAccountById)
+### GET
 
-# /api/v1/account/{id}
+## /api/v1/account/{id}
 
-PathVariable
+### PathVariable
 - id: "String" (UUID)
 
-Пометить аккаунт как удалённый по ID
-operationId: markAccountAsDeletedById
-DELETE
+# Пометить аккаунт как удалённый по ID
+[//]: # (operationId: markAccountAsDeletedById)
+### DELETE
 
-# /api/v1/account/{id}
+## /api/v1/account/{id}
 
-PathVariable
+### PathVariable
 - id: "String" (UUID)
 
-Пометить аккаунт как заблокированный по ID
-operationId: markAccountAsBlockedById
-PATCH
+# Пометить аккаунт как заблокированный по ID
+[//]: # (operationId: markAccountAsBlockedById)
+### PATCH
 
-# /api/v1/account/{id}
+## /api/v1/account/{id}
 
-PathVariable
+### PathVariable
 - id: "String" (UUID)
 
-Получение общего количества аккаунтов для telegram-бота
-operationId: getTotalAccountsCount
-GET
+# Получение общего количества аккаунтов для telegram-бота
+[//]: # (operationId: getTotalAccountsCount)
+### GET
 
-# /api/v1/account/total
+## /api/v1/account/total
 
-Глобальный поиск аккаунта по ключевым словам
-operationId: searchAccounts
-GET
+# Глобальный поиск аккаунта по ключевым словам
+[//]: # (operationId: searchAccounts)
+### GET
 
-# /api/v1/account/search
+## /api/v1/account/search
 
-RequestBody
+### RequestBody
 `{
 "author": "",
 "ids": [],
@@ -141,16 +149,17 @@ RequestBody
 "statusCode": "FRIEND",
 "isDeleted": false
 }`
-RequestParam
+### RequestParam
 - pageSize: 3
 - pageNumber: 0
 
-Поиск аккаунта по статус-коду отношений в микросервисе Friends. Этот контроллер ссылается на глобальный поиск аккаунтов
-/search, так как в нем учтен statusCode.
-operationId: searchByStatusCode
-GET
+# Поиск аккаунта по статус-коду отношений в микросервисе Friends. Этот контроллер ссылается на глобальный поиск аккаунтов /search, так как в нем учтен statusCode.
+[//]: # (operationId: searchByStatusCode)
+### GET
 
-RequestParam
+## /api/v1/account/search/statusCode
+
+### RequestParam
 
 - statusCode: FRIEND
 - pageSize: 0

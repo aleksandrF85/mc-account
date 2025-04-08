@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Data
-public class AccountMeDto implements Serializable {
+public class AccountMeDto{
 
     private String id; //TODO получать данные при авторизации
     @NotBlank(message = "Имя должно быть указано")
