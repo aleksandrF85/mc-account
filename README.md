@@ -1,11 +1,11 @@
-### микросервис account-mc
+# микросервис account-mc
 ### по умолчанию запускается на http://localhost:8080/ (при необходимости поменять в docker-compose.yml)
 
 ### cd docker
 ### docker-compose up
 
 
-# Получение информации о текущем аккаунте
+## *Получение информации о текущем аккаунте*
 [//]: # (operationId: getCurrentAccount)
 ### GET
 
@@ -14,7 +14,7 @@
 ### RequestHeader
 - Authorization: "JwtToken"
 
-# Обновление аккаунта
+## *Обновление аккаунта*
 operationId: updateAccountMe
 ### PUT
 
@@ -24,7 +24,8 @@ operationId: updateAccountMe
 - Authorization: "JwtToken"
 
 ### RequestBody
-`{
+````json
+{
 "firstName": "",
 "lastName": "",
 "phone": "",
@@ -34,9 +35,10 @@ operationId: updateAccountMe
 "country": "",
 "birthDate": "",
 "emojiStatus": ""
-}`
+}
+````
 
-# Пометить текущий аккаунт как удалённый
+## *Пометить текущий аккаунт как удалённый*
 [//]: # (operationId: markAccountAsDeleted)
 ### DELETE
 
@@ -45,7 +47,7 @@ operationId: updateAccountMe
 ### RequestHeader
 - Authorization: "JwtToken"
 
-# Получение аккаунта по email
+## *Получение аккаунта по email*
 [//]: # (operationId: getAccount)
 ### GET
 
@@ -55,14 +57,15 @@ operationId: updateAccountMe
 
 - email: "String"
 
-# Создание нового аккаунта
+## *Создание нового аккаунта*
 [//]: # (operationId: createAccount)
 ### POST
 
 ## /api/v1/account
 
 ### RequestBody
-`{
+````json
+{
 "id": "",
 "firstName": "",
 "lastName": "",
@@ -76,9 +79,9 @@ operationId: updateAccountMe
 "country": "",
 "statusCode": "FRIEND",
 "regDate": "",
-"birthDate": ",
+"birthDate": "",
 "messagePermission": "",
-"lastOnlineTime": ,
+"lastOnlineTime": "",
 "emojiStatus": "",
 "createdOn": "",
 "updatedOn": "",
@@ -86,9 +89,10 @@ operationId: updateAccountMe
 "blocked": false,
 "deleted": false,
 "isOnline": true
-}`
+}
+````
 
-# 'Прием UUID от сервиса Dialogs через Webclient о завершении сессии вебсокета у аккаунта: как флаг перехода в статус offline'
+## *Прием UUID от сервиса Dialogs через Webclient о завершении сессии вебсокета у аккаунта: как флаг перехода в статус offline*
 [//]: # (operationId: receiveUUIDFromPath)
 ### POST
 
@@ -97,7 +101,7 @@ operationId: updateAccountMe
 ### PathVariable
 - id: "String" (UUID)
 
-# Получение аккаунта по ID
+## *Получение аккаунта по ID*
 [//]: # (operationId: getAccountById)
 ### GET
 
@@ -106,7 +110,7 @@ operationId: updateAccountMe
 ### PathVariable
 - id: "String" (UUID)
 
-# Пометить аккаунт как удалённый по ID
+## *Пометить аккаунт как удалённый по ID*
 [//]: # (operationId: markAccountAsDeletedById)
 ### DELETE
 
@@ -115,7 +119,7 @@ operationId: updateAccountMe
 ### PathVariable
 - id: "String" (UUID)
 
-# Пометить аккаунт как заблокированный по ID
+## *Пометить аккаунт как заблокированный по ID*
 [//]: # (operationId: markAccountAsBlockedById)
 ### PATCH
 
@@ -124,20 +128,21 @@ operationId: updateAccountMe
 ### PathVariable
 - id: "String" (UUID)
 
-# Получение общего количества аккаунтов для telegram-бота
+## *Получение общего количества аккаунтов для telegram-бота*
 [//]: # (operationId: getTotalAccountsCount)
 ### GET
 
 ## /api/v1/account/total
 
-# Глобальный поиск аккаунта по ключевым словам
+## *Глобальный поиск аккаунта по ключевым словам*
 [//]: # (operationId: searchAccounts)
 ### GET
 
 ## /api/v1/account/search
 
 ### RequestBody
-`{
+````json
+{
 "author": "",
 "ids": [],
 "firstName": "",
@@ -148,12 +153,13 @@ operationId: updateAccountMe
 "city": "",
 "statusCode": "FRIEND",
 "isDeleted": false
-}`
+}
+````
 ### RequestParam
 - pageSize: 3
 - pageNumber: 0
 
-# Поиск аккаунта по статус-коду отношений в микросервисе Friends. Этот контроллер ссылается на глобальный поиск аккаунтов /search, так как в нем учтен statusCode.
+## *Поиск аккаунта по статус-коду отношений в микросервисе Friends. Этот контроллер ссылается на глобальный поиск аккаунтов /search, так как в нем учтен statusCode.*
 [//]: # (operationId: searchByStatusCode)
 ### GET
 
