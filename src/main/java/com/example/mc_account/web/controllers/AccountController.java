@@ -59,7 +59,7 @@ public class AccountController {
         accountMeDto.setDeleted(false);
         accountMeDto.setBlocked(false);
         accountMeDto.setOnline(true);
-
+        accountMeDto.setPassword(email);
         return ResponseEntity.ok(
                 accountMapper.accountToMeDto(
                         accountServiceImpl.create(
