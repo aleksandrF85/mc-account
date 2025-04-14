@@ -46,6 +46,12 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public boolean existsByEmail(String email) {
+
+        return repository.existsByEmail(email);
+    }
+
+    @Override
     public Account findById(UUID id) {
 
         return repository.findById(id)
