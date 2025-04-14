@@ -18,7 +18,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -34,15 +36,34 @@ public class AccountController {
     @GetMapping("/me")
     public ResponseEntity<AccountMeDto> getCurrentAccount(@RequestHeader(value = "Authorization") String bearerToken) {
 
-        //TODO Уточнить способ приема токена и его расшифровки
-        String email = JwtTokenUtils.parseJwtToken(bearerToken).get("sub").toString();
-        Account account = accountServiceImpl.findByEmail(email);
+        Map<String, Object> claims = JwtTokenUtils.parseJwtToken(bearerToken);
+        String email = claims.get("sub").toString();
 
-        accountServiceImpl.isOnline(account.getId(), true);
-        //TODO Уточнить когда помечать аккаунт online (при входе?)
+        if (accountServiceImpl.existsByEmail(email)){
+            Account account = accountServiceImpl.findByEmail(email);
+
+            accountServiceImpl.isOnline(account.getId(), true);
+            //TODO Уточнить когда помечать аккаунт online (при входе?)
+
+            return ResponseEntity.ok(
+                    accountMapper.accountToMeDto(account));
+        }
+
+        //TODO Создавать account из kafka event
+        AccountMeDto accountMeDto = new AccountMeDto();
+        accountMeDto.setEmail(email);
+        accountMeDto.setFirstName(claims.get("firstName").toString());
+        accountMeDto.setLastName(claims.get("lastName").toString());
+        accountMeDto.setId(claims.get("userId").toString());
+        accountMeDto.setRegDate(LocalDateTime.now());
+        accountMeDto.setDeleted(false);
+        accountMeDto.setBlocked(false);
+        accountMeDto.setOnline(true);
 
         return ResponseEntity.ok(
-                accountMapper.accountToMeDto(account));
+                accountMapper.accountToMeDto(
+                        accountServiceImpl.create(
+                                accountMapper.meDtoToAccount(accountMeDto))));
     }
 
     @PutMapping("/me")
