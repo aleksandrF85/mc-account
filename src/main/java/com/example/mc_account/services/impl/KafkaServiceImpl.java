@@ -7,7 +7,6 @@ import com.example.mc_account.event.UserRegistrationEvent;
 import com.example.mc_account.model.Account;
 import com.example.mc_account.services.AccountService;
 import com.example.mc_account.services.KafkaService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -24,16 +23,14 @@ public class KafkaServiceImpl implements KafkaService {
 
 
     private final AccountService accountServiceImpl;
-    private final ObjectMapper objectMapper;
 
     @SneakyThrows
     @KafkaListener(topics = "${app.kafka.userRegistration}",
             groupId = "${app.kafka.groupId}",
             containerFactory = "userRegistrationEventKafkaListenerContainerFactory")
     @Override
-    public void createAccountByUserRegistrationEvent(String message) {
+    public void createAccountByUserRegistrationEvent(UserRegistrationEvent event) {
 
-        UserRegistrationEvent event = objectMapper.readValue(message, UserRegistrationEvent.class);
 
         log.info("Received event: {}", event.getUserRegistration().toString());
 
