@@ -1,9 +1,9 @@
 package com.example.mc_account.services.impl;
 
-import com.example.mc_account.event.ResetPassword;
-import com.example.mc_account.event.ResetPasswordEvent;
-import com.example.mc_account.event.UserRegistration;
-import com.example.mc_account.event.UserRegistrationEvent;
+import com.skillbox.auth.dto.events.ResetPassword;
+import com.skillbox.auth.dto.events.ResetPasswordEvent;
+import com.skillbox.auth.dto.events.UserRegistration;
+import com.skillbox.auth.dto.events.UserRegistrationEvent;
 import com.example.mc_account.model.Account;
 import com.example.mc_account.services.AccountService;
 import com.example.mc_account.services.KafkaService;

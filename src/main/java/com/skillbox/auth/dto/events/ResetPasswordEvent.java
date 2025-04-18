@@ -1,4 +1,4 @@
-package com.example.mc_account.event;
+package com.skillbox.auth.dto.events;
 
 
 public class ResetPasswordEvent {

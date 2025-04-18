@@ -1,7 +1,7 @@
 package com.example.mc_account.configuration;
 
-import com.example.mc_account.event.ResetPasswordEvent;
-import com.example.mc_account.event.UserRegistrationEvent;
+import com.skillbox.auth.dto.events.ResetPasswordEvent;
+import com.skillbox.auth.dto.events.UserRegistrationEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
