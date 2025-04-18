@@ -45,6 +45,6 @@ app:
     enable: true
     userRegistration: "REGISTER_TOP"
     resetPassword: "NOTIFICATION"
-    kafkaMessageGroupId: "socialNetwork-group-id"
+    groupId: "socialNetwork-group-id"
 server:
   port: 8080
