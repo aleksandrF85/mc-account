@@ -1,28 +1,12 @@
 package com.skillbox.auth.dto.events;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ResetPasswordEvent {
     private ResetPassword resetPassword;
-
-    public ResetPasswordEvent() {
-    }
-
-    public ResetPasswordEvent(ResetPassword resetPassword) {
-        this.resetPassword = resetPassword;
-    }
-
-    public ResetPassword getResetPassword() {
-        return resetPassword;
-    }
-
-    public void setResetPassword(ResetPassword resetPassword) {
-        this.resetPassword = resetPassword;
-    }
-
-    @Override
-    public String toString() {
-        return "ResetPasswordEvent{" +
-                "resetPassword=" + resetPassword +
-                '}';
-    }
 }

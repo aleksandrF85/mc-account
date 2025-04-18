@@ -1,5 +1,6 @@
 package com.example.mc_account.services.impl;
 
+import com.example.mc_account.model.RoleType;
 import com.skillbox.auth.dto.events.ResetPassword;
 import com.skillbox.auth.dto.events.ResetPasswordEvent;
 import com.skillbox.auth.dto.events.UserRegistration;
@@ -14,6 +15,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -41,15 +43,16 @@ public class KafkaServiceImpl implements KafkaService {
         account.setFirstName(userRegistration.getFirstName());
         account.setLastName(userRegistration.getLastName());
         account.setId(UUID.fromString(userRegistration.getUserId()));
+        account.setPassword(userRegistration.getPassword());
+        account.setRole(Set.of(Enum.valueOf(RoleType.class, userRegistration.getRole())));
         account.setRegDate(LocalDateTime.now());
         account.setDeleted(false);
         account.setBlocked(false);
         account.setOnline(false);
-        account.setPassword(userRegistration.getUserId()); //TODO Уточнить откуда получать пароль
-        log.info("Create account: " + account);
+        account.setPassword(userRegistration.getUserId());
 
         accountServiceImpl.create(account);
-        log.info("Created account from DB: " + accountServiceImpl.findByEmail(userRegistration.getEmail()).toString());
+        log.info("Account created: " + account);
     }
 
     @KafkaListener(topics = "${app.kafka.resetPassword}",
@@ -61,10 +64,10 @@ public class KafkaServiceImpl implements KafkaService {
         ResetPassword resetPassword = event.getResetPassword();
 
         Account account = accountServiceImpl.findByEmail(resetPassword.getEmail());
-        account.setPassword(resetPassword.getToken()); //TODO Уточнить откуда получать пароль
-        log.info(account.toString());
+        account.setPassword(resetPassword.getToken()); //TODO Уточнить откуда получать новый пароль
 
         accountServiceImpl.update(account, account.getId());
+        log.info("Account updated: " + account);
 
     }
 

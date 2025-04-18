@@ -1,28 +1,13 @@
 package com.skillbox.auth.dto.events;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserRegistrationEvent {
     private UserRegistration userRegistration;
 
-    public UserRegistrationEvent() {
-    }
-
-    public UserRegistrationEvent(UserRegistration userRegistration) {
-        this.userRegistration = userRegistration;
-    }
-
-    public UserRegistration getUserRegistration() {
-        return userRegistration;
-    }
-
-    public void setUserRegistration(UserRegistration userRegistration) {
-        this.userRegistration = userRegistration;
-    }
-
-    @Override
-    public String toString() {
-        return "UserRegistrationEvent{" +
-                "userRegistration=" + userRegistration +
-                '}';
-    }
 }
