@@ -39,38 +39,19 @@ public class AccountController {
         Map<String, Object> claims = JwtTokenUtils.parseJwtToken(bearerToken);
         String email = claims.get("sub").toString();
 
-        if (accountServiceImpl.existsByEmail(email)){
-            Account account = accountServiceImpl.findByEmail(email);
+        Account account = accountServiceImpl.findByEmail(email);
 
-            accountServiceImpl.isOnline(account.getId(), true);
-            //TODO Уточнить когда помечать аккаунт online (при входе?)
+        accountServiceImpl.isOnline(account.getId(), true);
+        //TODO Уточнить когда помечать аккаунт online (при входе?)
 
-            return ResponseEntity.ok(
-                    accountMapper.accountToMeDto(account));
-        }
-
-        //TODO Создавать account из kafka event
-        AccountMeDto accountMeDto = new AccountMeDto();
-        accountMeDto.setEmail(email);
-        accountMeDto.setFirstName(claims.get("firstName").toString());
-        accountMeDto.setLastName(claims.get("lastName").toString());
-        accountMeDto.setId(claims.get("userId").toString());
-        accountMeDto.setRegDate(LocalDateTime.now());
-        accountMeDto.setDeleted(false);
-        accountMeDto.setBlocked(false);
-        accountMeDto.setOnline(true);
-        accountMeDto.setPassword(email);
         return ResponseEntity.ok(
-                accountMapper.accountToMeDto(
-                        accountServiceImpl.create(
-                                accountMapper.meDtoToAccount(accountMeDto))));
+                accountMapper.accountToMeDto(account));
     }
 
     @PutMapping("/me")
     public ResponseEntity<AccountMeDto> updateCurrentAccount(@RequestHeader(value = "Authorization") String bearerToken,
                                                              @RequestBody AccountUpdateDto request) {
 
-        //TODO Уточнить способ приема токена и его расшифровки
         String email = JwtTokenUtils.parseJwtToken(bearerToken).get("sub").toString();
         UUID id = accountServiceImpl.findByEmail(email).getId();
 
@@ -82,7 +63,6 @@ public class AccountController {
     @DeleteMapping("/me")
     public ResponseEntity<Void> markAccountAsDeleted(@RequestHeader(value = "Authorization") String bearerToken) {
 
-        //TODO Уточнить способ приема токена и его расшифровки
         String email = JwtTokenUtils.parseJwtToken(bearerToken).get("sub").toString();
         UUID id = accountServiceImpl.findByEmail(email).getId();
 

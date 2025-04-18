@@ -40,10 +40,11 @@ eureka:
     hostname: ${mc-account:localhost}
     prefer-ip-address: true
 #    instance-id: ${spring.application.name}:${random.uuid}
-#app:
-#  kafka:
-#    userRegistration: ""
-#    accountChanges: ""
-#    groupId: ""
+app:
+  kafka:
+    enable: true
+    userRegistration: "REGISTER_TOP"
+    resetPassword: "NOTIFICATION"
+    kafkaMessageGroupId: "socialNetwork-group-id"
 server:
   port: 8080
