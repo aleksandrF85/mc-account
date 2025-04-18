@@ -36,17 +36,21 @@ public class KafkaServiceImpl implements KafkaService {
 
         Account account = new Account();
         UserRegistration userRegistration = event.getUserRegistration();
+        log.info("create userRegistration: " + userRegistration.toString());
 
         account.setEmail(userRegistration.getEmail());
+        log.info("set email: " + userRegistration.getEmail());
         account.setFirstName(userRegistration.getFirstName());
+        log.info("set first name: " + userRegistration.getEmail());
         account.setLastName(userRegistration.getLastName());
+        log.info("set last name: " + userRegistration.getEmail());
         account.setId(UUID.fromString(userRegistration.getUserId()));
         account.setRegDate(LocalDateTime.now());
         account.setDeleted(false);
         account.setBlocked(false);
         account.setOnline(false);
         account.setPassword(userRegistration.getUserId()); //TODO Уточнить откуда получать пароль
-        log.info(account.toString());
+        log.info("Create account: " + account.toString());
 
         accountServiceImpl.create(account);
 
