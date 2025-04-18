@@ -46,7 +46,7 @@ public class KafkaServiceImpl implements KafkaService {
         account.setBlocked(false);
         account.setOnline(false);
         account.setPassword(userRegistration.getUserId()); //TODO Уточнить откуда получать пароль
-        log.info(account.getPassword());
+        log.info(account.toString());
 
         accountServiceImpl.create(account);
 
@@ -62,7 +62,7 @@ public class KafkaServiceImpl implements KafkaService {
 
         Account account = accountServiceImpl.findByEmail(resetPassword.getEmail());
         account.setPassword(resetPassword.getToken()); //TODO Уточнить откуда получать пароль
-        log.info(account.getPassword());
+        log.info(account.toString());
 
         accountServiceImpl.update(account, account.getId());
 
