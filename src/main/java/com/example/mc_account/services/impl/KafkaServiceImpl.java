@@ -8,15 +8,15 @@ import com.example.mc_account.model.Account;
 import com.example.mc_account.services.AccountService;
 import com.example.mc_account.services.KafkaService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Random;
 import java.util.UUID;
-import java.util.random.RandomGenerator;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class KafkaServiceImpl implements KafkaService {
@@ -48,13 +48,12 @@ public class KafkaServiceImpl implements KafkaService {
         account.setDeleted(false);
         account.setBlocked(false);
         account.setOnline(false);
-        account.setPassword(Random.from(RandomGenerator.getDefault()).toString());
-        //TODO Уточнить откуда получать пароль
+        account.setPassword(userRegistration.getUserId()); //TODO Уточнить откуда получать пароль
+        log.info(account.getPassword());
 
         accountServiceImpl.create(account);
 
     }
-
 
     @KafkaListener(topics = "${app.kafka.resetPassword}",
             groupId = "${app.kafka.groupId}",
@@ -65,8 +64,8 @@ public class KafkaServiceImpl implements KafkaService {
         ResetPassword resetPassword = event.getResetPassword();
 
         Account account = accountServiceImpl.findByEmail(resetPassword.getEmail());
-        account.setPassword(resetPassword.getToken());
-        //TODO Уточнить откуда получать пароль
+        account.setPassword(resetPassword.getToken()); //TODO Уточнить откуда получать пароль
+        log.info(account.getPassword());
 
         accountServiceImpl.update(account, account.getId());
 
