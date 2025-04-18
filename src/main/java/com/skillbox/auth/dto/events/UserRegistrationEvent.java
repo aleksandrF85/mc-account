@@ -18,4 +18,11 @@ public class UserRegistrationEvent {
     public void setUserRegistration(UserRegistration userRegistration) {
         this.userRegistration = userRegistration;
     }
+
+    @Override
+    public String toString() {
+        return "UserRegistrationEvent{" +
+                "userRegistration=" + userRegistration +
+                '}';
+    }
 }

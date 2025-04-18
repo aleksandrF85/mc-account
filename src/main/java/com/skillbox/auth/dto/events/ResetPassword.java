@@ -39,4 +39,13 @@ public class ResetPassword {
     public void setExpirationTime(Instant expirationTime) {
         this.expirationTime = expirationTime;
     }
+
+    @Override
+    public String toString() {
+        return "ResetPassword{" +
+                "token='" + token + '\'' +
+                ", email='" + email + '\'' +
+                ", expirationTime=" + expirationTime +
+                '}';
+    }
 }

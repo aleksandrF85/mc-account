@@ -18,4 +18,11 @@ public class ResetPasswordEvent {
     public void setResetPassword(ResetPassword resetPassword) {
         this.resetPassword = resetPassword;
     }
+
+    @Override
+    public String toString() {
+        return "ResetPasswordEvent{" +
+                "resetPassword=" + resetPassword +
+                '}';
+    }
 }
