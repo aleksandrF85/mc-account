@@ -32,7 +32,7 @@ public class KafkaServiceImpl implements KafkaService {
 
     private final AccountService accountServiceImpl;
 
-    @KafkaListener(topics = "${app.kafka.userRegistrations}",
+    @KafkaListener(topics = "${app.kafka.userRegistration}",
             groupId = "${app.kafka.groupId}",
             containerFactory = "userRegistrationEventKafkaListenerContainerFactory")
     @Override
