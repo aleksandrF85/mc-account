@@ -14,16 +14,17 @@ import com.example.mc_account.services.AccountService;
 import com.example.mc_account.utils.JwtTokenUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/account")
 @RequiredArgsConstructor
@@ -35,6 +36,8 @@ public class AccountController {
 
     @GetMapping("/me")
     public ResponseEntity<AccountMeDto> getCurrentAccount(@RequestHeader(value = "Authorization") String bearerToken) {
+
+        log.info(bearerToken);
 
         Map<String, Object> claims = JwtTokenUtils.parseJwtToken(bearerToken);
         String email = claims.get("sub").toString();
