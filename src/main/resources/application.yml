@@ -28,8 +28,8 @@ spring:
     change-log: classpath:/db/changelog/db.changelog-master.xml
   application:
     name: mc-account
-#  kafka:
-#    bootstrap-servers: localhost:9092
+  kafka:
+    bootstrap-servers: localhost:9092
 eureka:
   client:
     register-with-eureka: true
