@@ -1,6 +1,7 @@
 package com.example.mc_account.web.controllers;
 
 
+import com.example.mc_account.aop.Loggable;
 import com.example.mc_account.dto.AccountDataDto;
 import com.example.mc_account.dto.AccountMeDto;
 import com.example.mc_account.dto.AccountResponseDto;
@@ -40,9 +41,10 @@ public class AccountController {
     public final KafkaService kafkaServiceImpl;
 
     @GetMapping("/me")
+    @Loggable
     public ResponseEntity<AccountMeDto> getCurrentAccount(@RequestHeader(value = "Authorization") String bearerToken) {
 
-        log.info(bearerToken);
+        log.info("RequestHeader: " + bearerToken);
 
         Map<String, Object> claims = JwtTokenUtils.parseJwtToken(bearerToken);
         String email = claims.get("sub").toString();
@@ -57,6 +59,7 @@ public class AccountController {
     }
 
     @PutMapping("/me")
+    @Loggable
     public ResponseEntity<AccountMeDto> updateCurrentAccount(@RequestHeader(value = "Authorization") String bearerToken,
                                                              @RequestBody AccountUpdateDto request) {
 
@@ -71,6 +74,7 @@ public class AccountController {
     }
 
     @DeleteMapping("/me")
+    @Loggable
     public ResponseEntity<Void> markAccountAsDeleted(@RequestHeader(value = "Authorization") String bearerToken) {
 
         String email = JwtTokenUtils.parseJwtToken(bearerToken).get("sub").toString();
@@ -82,6 +86,7 @@ public class AccountController {
     }
 
     @GetMapping
+    @Loggable
     public ResponseEntity<AccountResponseDto> getAccount(@RequestParam String email) {
 
         return ResponseEntity.ok(
@@ -90,6 +95,7 @@ public class AccountController {
     }
 
     @PostMapping
+    @Loggable
     public ResponseEntity<AccountMeDto> createAccount(@RequestBody @Valid AccountMeDto request) {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
@@ -99,6 +105,7 @@ public class AccountController {
     }
 
     @PostMapping("/lastAction/{id}")
+    @Loggable
     public ResponseEntity<Void> lastAction(@PathVariable String id) {
 
         //TODO Прием UUID от сервиса Dialogs через Webclient
@@ -111,12 +118,14 @@ public class AccountController {
     }
 
     @GetMapping("/{id}")
+    @Loggable
     public ResponseEntity<AccountDataDto> getAccountById(@PathVariable String id) {
 
         return ResponseEntity.ok(accountMapper.accountToDataDto(accountServiceImpl.findById(UUID.fromString(id))));
     }
 
     @DeleteMapping("/{id}")
+    @Loggable
     public ResponseEntity<Void> markAccountAsDeletedById(@PathVariable String id) {
 
         accountServiceImpl.deleteById(UUID.fromString(id));
@@ -125,6 +134,7 @@ public class AccountController {
     }
 
     @PatchMapping("/{id}")
+    @Loggable
     public ResponseEntity<Void> markAccountAsBlockedById(@PathVariable String id) {
 
         accountServiceImpl.blockById(UUID.fromString(id));
@@ -133,12 +143,14 @@ public class AccountController {
     }
 
     @GetMapping("/total")
+    @Loggable
     public ResponseEntity<Integer> getTotalAccountsCount() {
 
         return ResponseEntity.ok(accountServiceImpl.findAll().size());
     }
 
     @GetMapping("/search")
+    @Loggable
     public ResponseEntity<List<AccountDataDto>> searchAccounts(@RequestBody AccountSearchDto request,
                                                                @Valid PageFilter pageFilter) {
 
@@ -152,6 +164,7 @@ public class AccountController {
     }
 
     @GetMapping("/search/statusCode")
+    @Loggable
     public ResponseEntity<List<AccountDataDto>> searchByStatusCode(@RequestParam StatusCode statusCode,
                                                                    @Valid PageFilter pageFilter) {
 
