@@ -17,6 +17,7 @@ import org.springframework.web.servlet.HandlerMapping;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Scanner;
 
 @Aspect
 @Component
@@ -48,16 +49,14 @@ public class LoggingAspect {
         log.info("Request URI: " + request.getRequestURI());
         log.info("Header: " + request.getHeader("Authorization"));
 
-        StringBuilder body = new StringBuilder();
-        String line;
+        Scanner scanner = null;
         try {
-            while ((line = request.getReader().readLine()) != null) {
-                body.append("\n");
-                body.append(line);
-            }
+            scanner = new Scanner(request.getInputStream(), "UTF-8");
         } catch (IOException e) {
-            log.info("Error message: " + e.getMessage());
+            throw new RuntimeException(e);
         }
+        String body = scanner.useDelimiter("\\A").next();
+        scanner.close();
         if (!body.isEmpty()) {
             log.info("Request Body:" + body);
         }
