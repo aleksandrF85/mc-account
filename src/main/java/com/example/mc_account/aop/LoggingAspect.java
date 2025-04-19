@@ -16,7 +16,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.HandlerMapping;
 
-import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.Map;
 
 @Aspect
@@ -43,14 +43,25 @@ public class LoggingAspect {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
         var pathVariables = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+        var parameterMap = request.getParameterMap();
 
-        log.info("userId " + request.getParameter("userId"));
+        log.info("Request URI: " + request.getRequestURI());
+        log.info("Header: " + request.getHeader("Authorization"));
+        log.info("Path info: " + request.getUserPrincipal());
+        log.info("User Principal: " + request.getUserPrincipal());
+        log.info("Path info: " + request.getPathInfo());
 
+        log.info("parameterMap");
+        for (String name : parameterMap.keySet()) {
+            String key = name;
+            String value = Arrays.toString(parameterMap.get(name));
+            log.info("\t" + key + " " + value);
+        }
         log.info("pathVariables");
         for (String name : pathVariables.keySet()) {
-            String key = name.toString();
+            String key = name;
             String value = pathVariables.get(name);
-            log.info(key + " " + value);
+            log.info("\t" + key + " " + value);
         }
     }
 

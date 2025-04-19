@@ -44,8 +44,6 @@ public class AccountController {
     @Loggable
     public ResponseEntity<AccountMeDto> getCurrentAccount(@RequestHeader(value = "Authorization") String bearerToken) {
 
-        log.info("RequestHeader: " + bearerToken);
-
         Map<String, Object> claims = JwtTokenUtils.parseJwtToken(bearerToken);
         String email = claims.get("sub").toString();
 
