@@ -11,7 +11,10 @@ import com.example.mc_account.mapper.AccountMapper;
 import com.example.mc_account.model.Account;
 import com.example.mc_account.model.StatusCode;
 import com.example.mc_account.services.AccountService;
+import com.example.mc_account.services.KafkaService;
 import com.example.mc_account.utils.JwtTokenUtils;
+import com.skillbox.auth.dto.events.AccountChanges;
+import com.skillbox.auth.dto.events.AccountChangesEvent;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +36,8 @@ public class AccountController {
     public final AccountMapper accountMapper;
 
     public final AccountService accountServiceImpl;
+
+    public final KafkaService kafkaServiceImpl;
 
     @GetMapping("/me")
     public ResponseEntity<AccountMeDto> getCurrentAccount(@RequestHeader(value = "Authorization") String bearerToken) {
@@ -57,6 +62,8 @@ public class AccountController {
 
         String email = JwtTokenUtils.parseJwtToken(bearerToken).get("sub").toString();
         UUID id = accountServiceImpl.findByEmail(email).getId();
+
+        sendAccountChangesEvent(request, id.toString());
 
         return ResponseEntity.ok(
                 accountMapper.accountToMeDto(
@@ -159,4 +166,24 @@ public class AccountController {
                         .collect(Collectors.toList()));
     }
 
+    private void sendAccountChangesEvent(AccountUpdateDto request, String id) {
+
+        AccountChangesEvent event = new AccountChangesEvent();
+
+        event.setAccountChanges(new AccountChanges(
+                id,
+                request.getFirstName(),
+                request.getLastName(),
+                request.getPhone(),
+                request.getPhoto(),
+                request.getAbout(),
+                request.getCity(),
+                request.getCountry(),
+                request.getBirthDate(),
+                request.getEmojiStatus()
+        ));
+
+        kafkaServiceImpl.sendUserRegistrationEvent(event);
+
+    }
 }

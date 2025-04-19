@@ -1,18 +1,19 @@
 package com.example.mc_account.services.impl;
 
 import com.example.mc_account.model.RoleType;
-import com.skillbox.auth.dto.events.ResetPassword;
-import com.skillbox.auth.dto.events.ResetPasswordEvent;
-import com.skillbox.auth.dto.events.UserRegistration;
-import com.skillbox.auth.dto.events.UserRegistrationEvent;
+import com.skillbox.auth.dto.events.*;
 import com.example.mc_account.model.Account;
 import com.example.mc_account.services.AccountService;
 import com.example.mc_account.services.KafkaService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.SendResult;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import java.util.concurrent.CompletableFuture;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -23,8 +24,19 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class KafkaServiceImpl implements KafkaService {
 
-
+    @Value("${app.kafka.accountChanges}")
+    private String accountChangesEventTopic;
     private final AccountService accountServiceImpl;
+    private final KafkaTemplate<String, AccountChangesEvent> template;
+
+    @Override
+    public void sendUserRegistrationEvent(AccountChangesEvent event) {
+
+        CompletableFuture<SendResult<String, AccountChangesEvent>> result = template.send(accountChangesEventTopic, event);
+
+        log.info("Sent event {}", event);
+
+   }
 
     @SneakyThrows
     @KafkaListener(topics = "${app.kafka.userRegistration}",
@@ -49,7 +61,6 @@ public class KafkaServiceImpl implements KafkaService {
         account.setDeleted(false);
         account.setBlocked(false);
         account.setOnline(false);
-        account.setPassword(userRegistration.getUserId());
 
         accountServiceImpl.create(account);
         log.info("Account created: " + account);
