@@ -45,6 +45,7 @@ app:
     enable: true
     userRegistration: "REGISTER_TOP"
     resetPassword: "NOTIFICATION"
+    accountChanges: "ACCOUNT_CHANGES"
     groupId: "socialNetwork-group-id"
 server:
   port: 8080
