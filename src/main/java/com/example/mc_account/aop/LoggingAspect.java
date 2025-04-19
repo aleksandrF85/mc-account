@@ -49,17 +49,7 @@ public class LoggingAspect {
         log.info("Request URI: " + request.getRequestURI());
         log.info("Header: " + request.getHeader("Authorization"));
 
-        Scanner scanner = null;
-        try {
-            scanner = new Scanner(request.getInputStream(), "UTF-8");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        String body = scanner.useDelimiter("\\A").next();
-        scanner.close();
-        if (!body.isEmpty()) {
-            log.info("Request Body:" + body);
-        }
+        log.info("Content Type: " + request.getContentType());
 
         if (!pathVariables.isEmpty()){
             log.info("Path Variables:");
