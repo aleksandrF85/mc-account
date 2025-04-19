@@ -1,7 +1,6 @@
 package com.example.mc_account.aop;
 
 
-
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -9,13 +8,13 @@ import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.HandlerMapping;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -45,24 +44,43 @@ public class LoggingAspect {
         var pathVariables = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
         var parameterMap = request.getParameterMap();
 
+        log.info("Request method: " + request.getMethod());
         log.info("Request URI: " + request.getRequestURI());
         log.info("Header: " + request.getHeader("Authorization"));
-        log.info("Path info: " + request.getUserPrincipal());
-        log.info("User Principal: " + request.getUserPrincipal());
-        log.info("Path info: " + request.getPathInfo());
 
-        log.info("parameterMap");
-        for (String name : parameterMap.keySet()) {
-            String key = name;
-            String value = Arrays.toString(parameterMap.get(name));
-            log.info("\t" + key + " " + value);
+        StringBuilder body = new StringBuilder();
+        String line;
+        try {
+            while ((line = request.getReader().readLine()) != null) {
+                body.append("\n");
+                body.append(line);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        log.info("pathVariables");
-        for (String name : pathVariables.keySet()) {
-            String key = name;
-            String value = pathVariables.get(name);
-            log.info("\t" + key + " " + value);
+        if (!body.isEmpty()) {
+            log.info("Request Body:" + body);
         }
+
+        if (!pathVariables.isEmpty()){
+            log.info("Path Variables:");
+            for (String name : pathVariables.keySet()) {
+                String key = name;
+                String value = pathVariables.get(name);
+                log.info("\t" + key + " " + value);
+            }
+        }
+
+        if (!parameterMap.isEmpty()){
+            log.info("Parameter Map:");
+            for (String name : parameterMap.keySet()) {
+                String key = name;
+                String value = Arrays.toString(parameterMap.get(name));
+                log.info("\t" + key + " " + value);
+            }
+        }
+
+
     }
 
     @After("@annotation(Loggable)")
