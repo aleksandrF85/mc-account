@@ -56,7 +56,7 @@ public class LoggingAspect {
                 body.append(line);
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            log.info("Error message: " + e.getMessage());
         }
         if (!body.isEmpty()) {
             log.info("Request Body:" + body);
