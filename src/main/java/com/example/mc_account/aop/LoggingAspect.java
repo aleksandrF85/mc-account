@@ -14,10 +14,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.HandlerMapping;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Scanner;
 
 @Aspect
 @Component
@@ -48,8 +46,7 @@ public class LoggingAspect {
         log.info("Request method: " + request.getMethod());
         log.info("Request URI: " + request.getRequestURI());
         log.info("Header: " + request.getHeader("Authorization"));
-
-        log.info("Content Type: " + request.getContentType());
+        log.info("Content: " + request.getContentType());
 
         if (!pathVariables.isEmpty()){
             log.info("Path Variables:");
