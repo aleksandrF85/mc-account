@@ -27,4 +27,6 @@ public interface AccountService {
     void isOnline(UUID id, boolean isOnline);
 
     Account findByEmail(String email);
+
+    boolean existsByEmail(String email);
 }
