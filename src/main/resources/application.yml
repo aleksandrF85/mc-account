@@ -12,7 +12,7 @@ spring:
           jta:
             platform: enable
     hibernate:
-      ddl-auto: create-drop #update
+      ddl-auto: create #-drop #update
     generate-ddl: true
     show-sql: true
   datasource:
@@ -26,11 +26,26 @@ spring:
   liquibase:
     enabled: true
     change-log: classpath:/db/changelog/db.changelog-master.xml
-#  kafka:
-#    bootstrap-servers: localhost:9092
-#app:
-#  kafka:
-#    accountChanges: ""
-#    groupId: ""
+  application:
+    name: mc-account
+  kafka:
+    bootstrap-servers: localhost:9092
+eureka:
+  client:
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://${EUREKA-HOST:localhost}:8761/eureka/
+    fetch-registry: true
+  instance:
+    hostname: ${mc-account:localhost}
+    prefer-ip-address: true
+#    instance-id: ${spring.application.name}:${random.uuid}
+app:
+  kafka:
+    enable: true
+    userRegistration: "REGISTER_TOP"
+    resetPassword: "NOTIFICATION"
+    accountChanges: "ACCOUNT_CHANGES"
+    groupId: "socialNetwork-group-id"
 server:
   port: 8080

@@ -39,10 +39,23 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account findByEmail(String email) {
-        return repository.findByEmail(email)
+         Account account = repository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException(MessageFormat.format(
                         "Пользователь с таким email {0} не найден!", email
                 )));
+
+        if (account.isDeleted()) {
+            throw new EntityNotFoundException(MessageFormat.format(
+                    "Пользователь с таким email {0} удален!", email));
+        }
+
+        return account;
+    }
+
+    @Override
+    public boolean existsByEmail(String email) {
+
+        return repository.existsByEmail(email);
     }
 
     @Override

@@ -13,7 +13,7 @@ public class JwtTokenUtils {
     @SneakyThrows
     public Map<String, Object> parseJwtToken(String bearerToken) {
 
-        JWT jwt = JWTParser.parse(bearerToken);
+        JWT jwt = JWTParser.parse(bearerToken.replaceFirst("Bearer ", ""));
         Map<String, Object> claims = jwt.getJWTClaimsSet().getClaims();
 
         return claims;
