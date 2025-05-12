@@ -148,21 +148,20 @@ public class AccountController {
 
     @GetMapping("/search")
     @Loggable
-    public ResponseEntity<List<AccountDataDto>> searchAccounts(@RequestParam AccountSearchDto request,
-//                                                               @RequestParam(required = false)  String author,
-//                                                               @RequestParam(required = false)  List<String> ids,
-//                                                               @RequestParam(required = false)  String firstName,
-//                                                               @RequestParam(required = false)  String lastName,
-//                                                               @RequestParam(required = false, defaultValue = "0")  Integer ageTo,
-//                                                               @RequestParam(required = false, defaultValue = "0")  Integer ageFrom,
-//                                                               @RequestParam(required = false)  String country,
-//                                                               @RequestParam(required = false)  String city,
-//                                                               @RequestParam(required = false)  String statusCode,
-//                                                               @RequestParam(required = false)  boolean isDelete,
+    public ResponseEntity<List<AccountDataDto>> searchAccounts(@RequestParam(required = false)  String author,
+                                                               @RequestParam(required = false)  List<String> ids,
+                                                               @RequestParam(required = false)  String firstName,
+                                                               @RequestParam(required = false)  String lastName,
+                                                               @RequestParam(required = false)  Integer ageTo,
+                                                               @RequestParam(required = false)  Integer ageFrom,
+                                                               @RequestParam(required = false)  String country,
+                                                               @RequestParam(required = false)  String city,
+                                                               @RequestParam(required = false)  String statusCode,
+                                                               @RequestParam(required = false)  boolean isDelete,
                                                                @RequestParam(required = false, defaultValue = "0") String page,
                                                                @RequestParam(required = false, defaultValue = "5") String size) {
 
-//        AccountSearchDto request = new AccountSearchDto(author, ids, firstName, lastName, ageTo, ageFrom, country, city, Enum.valueOf(StatusCode.class, statusCode), isDelete);
+        AccountSearchDto request = new AccountSearchDto(author, ids, firstName, lastName, ageTo, ageFrom, country, city, Enum.valueOf(StatusCode.class, statusCode), isDelete);
         //TODO Уточнить дополнительные параметры поиска и ответ (должен быть Page?)
 
 
