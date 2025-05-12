@@ -7,15 +7,14 @@ import com.example.mc_account.dto.AccountMeDto;
 import com.example.mc_account.dto.AccountResponseDto;
 import com.example.mc_account.dto.AccountUpdateDto;
 import com.example.mc_account.dto.filter.AccountSearchDto;
-import com.example.mc_account.dto.filter.PageFilter;
 import com.example.mc_account.mapper.AccountMapper;
 import com.example.mc_account.model.Account;
 import com.example.mc_account.model.StatusCode;
 import com.example.mc_account.services.AccountService;
 import com.example.mc_account.services.KafkaService;
 import com.example.mc_account.utils.JwtTokenUtils;
-import com.skillbox.auth.dto.events.AccountChanges;
-import com.skillbox.auth.dto.events.AccountChangesEvent;
+import com.example.mc_account.events.AccountChanges;
+import com.example.mc_account.events.AccountChangesEvent;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -149,30 +148,51 @@ public class AccountController {
 
     @GetMapping("/search")
     @Loggable
-    public ResponseEntity<List<AccountDataDto>> searchAccounts(@RequestBody AccountSearchDto request,
-                                                               @Valid PageFilter pageFilter) {
+    public ResponseEntity<List<AccountDataDto>> searchAccounts(@RequestParam(required = false)  String author,
+                                                               @RequestParam(required = false)  List<String> ids,
+                                                               @RequestParam(required = false)  String firstName,
+                                                               @RequestParam(required = false)  String lastName,
+                                                               @RequestParam(required = false)  Integer ageTo,
+                                                               @RequestParam(required = false)  Integer ageFrom,
+                                                               @RequestParam(required = false)  String country,
+                                                               @RequestParam(required = false)  String city,
+                                                               @RequestParam(required = false)  String statusCode,
+                                                               @RequestParam(required = false)  boolean isDelete,
+                                                               @RequestParam(required = false, defaultValue = "0") String page,
+                                                               @RequestParam(required = false, defaultValue = "5") String size) {
 
+        AccountSearchDto request = new AccountSearchDto(author, ids, firstName, lastName, ageTo, ageFrom, country, city, Enum.valueOf(StatusCode.class, statusCode), isDelete);
         //TODO Уточнить дополнительные параметры поиска и ответ (должен быть Page?)
 
 
         return ResponseEntity.ok(
-                accountServiceImpl.search(request, pageFilter).stream()
+                accountServiceImpl.search(request, Integer.parseInt(page), Integer.parseInt(size)).stream()
                         .map(accountMapper::accountToDataDto)
                         .collect(Collectors.toList()));
     }
 
     @GetMapping("/search/statusCode")
     @Loggable
-    public ResponseEntity<List<AccountDataDto>> searchByStatusCode(@RequestParam StatusCode statusCode,
-                                                                   @Valid PageFilter pageFilter) {
+    public ResponseEntity<List<AccountDataDto>> searchByStatusCode(@RequestParam(required = false)  String author,
+                                                                   @RequestParam(required = false)  List<String> ids,
+                                                                   @RequestParam(required = false)  String firstName,
+                                                                   @RequestParam(required = false)  String lastName,
+                                                                   @RequestParam(required = false)  Integer ageTo,
+                                                                   @RequestParam(required = false)  Integer ageFrom,
+                                                                   @RequestParam(required = false)  String country,
+                                                                   @RequestParam(required = false)  String city,
+                                                                   @RequestParam(required = false)  String statusCode,
+                                                                   @RequestParam(required = false)  boolean isDelete,
+                                                                   @RequestParam(required = false, defaultValue = "0") String page,
+                                                                   @RequestParam(required = false, defaultValue = "5")  String size) {
 
         //TODO Уточнить дополнительные параметры поиска и ответ (должен быть Page?)
 
         AccountSearchDto request = new AccountSearchDto();
-        request.setStatusCode(statusCode);
+        request.setStatusCode(Enum.valueOf(StatusCode.class, statusCode));
 
         return ResponseEntity.ok(
-                accountServiceImpl.search(request, pageFilter).stream()
+                accountServiceImpl.search(request, Integer.parseInt(page), Integer.parseInt(size)).stream()
                         .map(accountMapper::accountToDataDto)
                         .collect(Collectors.toList()));
     }

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.UUID;
 
 public interface AccountSpecification {
 
@@ -22,13 +23,16 @@ public interface AccountSpecification {
                 .and(byAge(accountFilter.getAgeFrom(), accountFilter.getAgeTo()));
     }
 
-    static Specification<Account> byAccountIds(List<Long> ids) {
+    static Specification<Account> byAccountIds(List<String> ids) {
 
         return ((root, query, criteriaBuilder) -> {
             if (ids == null || ids.isEmpty()) {
                 return null;
             }
-            return root.get("id").in(ids);
+
+            List<UUID> uuidList = ids.stream().map(UUID::fromString).toList();
+
+            return root.get("id").in(uuidList);
         });
     }
 
@@ -38,7 +42,7 @@ public interface AccountSpecification {
             if (author == null || author.isEmpty()) {
                 return null;
             }
-            return criteriaBuilder.equal(root.get("author"), author);
+            return criteriaBuilder.equal(root.get("firstName"), author);
         });
     }
 

@@ -1,7 +1,6 @@
 package com.example.mc_account.services;
 
 import com.example.mc_account.dto.filter.AccountSearchDto;
-import com.example.mc_account.dto.filter.PageFilter;
 import com.example.mc_account.model.Account;
 
 import java.util.List;
@@ -10,7 +9,7 @@ import java.util.UUID;
 public interface AccountService {
 
 
-    List<Account> search(AccountSearchDto filter, PageFilter pageFilter);
+    List<Account> search(AccountSearchDto filter, Integer page, Integer size);
 
     List<Account> findAll();
 
