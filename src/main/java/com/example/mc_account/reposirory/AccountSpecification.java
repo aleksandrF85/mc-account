@@ -106,21 +106,25 @@ public interface AccountSpecification {
 
     static Specification<Account> byAge(Integer ageFrom, Integer ageTo) {
 
-        OffsetDateTime birthdayFrom = OffsetDateTime.now().minusYears(ageFrom);
-        OffsetDateTime birthdayTo = OffsetDateTime.now().minusYears(ageTo);
 
         return ((root, query, criteriaBuilder) -> {
 
             if (ageFrom == null && ageTo == null || ageFrom == 0 && ageTo == 0) {
                 return null;
             }
+
+//            OffsetDateTime birthdayFrom = OffsetDateTime.now().minusYears(ageFrom);
+//            OffsetDateTime birthdayTo = OffsetDateTime.now().minusYears(ageTo);
+
             if (ageFrom == null || ageFrom <= 0) {
-                return criteriaBuilder.lessThanOrEqualTo(root.get("birthDate"), birthdayTo);
+
+                return criteriaBuilder.lessThanOrEqualTo(root.get("birthDate"), OffsetDateTime.now().minusYears(ageTo));
             }
             if (ageTo == null || ageTo <= 0) {
-                return criteriaBuilder.greaterThanOrEqualTo(root.get("birthDate"), birthdayFrom);
+
+                return criteriaBuilder.greaterThanOrEqualTo(root.get("birthDate"), OffsetDateTime.now().minusYears(ageFrom));
             }
-            return criteriaBuilder.between(root.get("birthDate"), birthdayFrom, birthdayTo);
+            return criteriaBuilder.between(root.get("birthDate"), OffsetDateTime.now().minusYears(ageFrom), OffsetDateTime.now().minusYears(ageTo));
         });
     }
 }

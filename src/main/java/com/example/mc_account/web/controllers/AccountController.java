@@ -173,16 +173,7 @@ public class AccountController {
 
     @GetMapping("/search/statusCode")
     @Loggable
-    public ResponseEntity<List<AccountDataDto>> searchByStatusCode(@RequestParam(required = false)  String author,
-                                                                   @RequestParam(required = false)  List<String> ids,
-                                                                   @RequestParam(required = false)  String firstName,
-                                                                   @RequestParam(required = false)  String lastName,
-                                                                   @RequestParam(required = false)  Integer ageTo,
-                                                                   @RequestParam(required = false)  Integer ageFrom,
-                                                                   @RequestParam(required = false)  String country,
-                                                                   @RequestParam(required = false)  String city,
-                                                                   @RequestParam(required = false)  String statusCode,
-                                                                   @RequestParam(required = false)  boolean isDelete,
+    public ResponseEntity<List<AccountDataDto>> searchByStatusCode(@RequestParam(required = false)  String statusCode,
                                                                    @RequestParam(required = false, defaultValue = "0") String page,
                                                                    @RequestParam(required = false, defaultValue = "5")  String size) {
 
