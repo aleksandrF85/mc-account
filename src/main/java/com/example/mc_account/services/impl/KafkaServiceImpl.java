@@ -1,12 +1,11 @@
 package com.example.mc_account.services.impl;
 
-import com.example.mc_account.events.*;
 import com.example.mc_account.model.RoleType;
 import com.example.mc_account.model.Account;
 import com.example.mc_account.services.AccountService;
 import com.example.mc_account.services.KafkaService;
+import com.skillbox.auth.dto.events.*;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -93,15 +92,11 @@ public class KafkaServiceImpl implements KafkaService {
 
         ChangeEmail changeEmail = event.getChangeEmail();
 
-        if (changeEmail != null) {
-            Account account = accountServiceImpl.findById(UUID.fromString(changeEmail.getUserId()));
-            account.setEmail(changeEmail.getEmail());
+        Account account = accountServiceImpl.findById(UUID.fromString(changeEmail.getUserId()));
+        account.setEmail(changeEmail.getEmail());
 
-            accountServiceImpl.update(account, account.getId());
-            log.info("Account updated: " + account);
-        } else {
-            log.info(changeEmail.toString());
-        }
+        accountServiceImpl.update(account, account.getId());
+        log.info("Account updated: " + account);
 
     }
 

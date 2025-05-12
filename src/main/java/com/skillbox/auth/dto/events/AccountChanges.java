@@ -1,4 +1,4 @@
-package com.example.mc_account.events;
+package com.skillbox.auth.dto.events;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

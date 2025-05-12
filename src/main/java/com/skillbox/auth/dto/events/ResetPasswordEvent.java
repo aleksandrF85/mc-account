@@ -1,4 +1,4 @@
-package com.example.mc_account.events;
+package com.skillbox.auth.dto.events;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,9 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChangeEmail {
-    private String userId;
-    private String email;
-
+public class ResetPasswordEvent {
+    private ResetPassword resetPassword;
 }
-
