@@ -55,6 +55,7 @@ public class KafkaConfiguration {
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         config.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        config.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
 //        config.put(JsonDeserializer.TYPE_MAPPINGS, "com.skillbox.auth.dto.events.UserRegistrationEvent:com.skillbox.auth.dto.events.UserRegistrationEvent");
 
         return new DefaultKafkaConsumerFactory<>(config, new StringDeserializer(), new JsonDeserializer<>(UserRegistrationEvent.class, objectMapper));
@@ -75,6 +76,7 @@ public class KafkaConfiguration {
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         config.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        config.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
 //        config.put(JsonDeserializer.TYPE_MAPPINGS, "com.skillbox.auth.dto.events.ResetPasswordEvent:com.skillbox.auth.dto.events.ResetPasswordEvent");
 
         return new DefaultKafkaConsumerFactory<>(config, new StringDeserializer(), new JsonDeserializer<>(ResetPasswordEvent.class, objectMapper));
@@ -95,6 +97,7 @@ public class KafkaConfiguration {
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         config.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        config.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
 //        config.put(JsonDeserializer.TYPE_MAPPINGS, "com.skillbox.auth.dto.events.ChangeEmailEvent:com.skillbox.auth.dto.events.ChangeEmailEvent");
 
         return new DefaultKafkaConsumerFactory<>(config, new StringDeserializer(), new JsonDeserializer<>(ChangeEmailEvent.class, objectMapper));
