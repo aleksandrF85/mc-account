@@ -93,11 +93,15 @@ public class KafkaServiceImpl implements KafkaService {
 
         ChangeEmail changeEmail = event.getChangeEmail();
 
-        Account account = accountServiceImpl.findById(UUID.fromString(changeEmail.getUserId()));
-        account.setEmail(changeEmail.getEmail());
+        if (changeEmail != null) {
+            Account account = accountServiceImpl.findById(UUID.fromString(changeEmail.getUserId()));
+            account.setEmail(changeEmail.getEmail());
 
-        accountServiceImpl.update(account, account.getId());
-        log.info("Account updated: " + account);
+            accountServiceImpl.update(account, account.getId());
+            log.info("Account updated: " + account);
+        } else {
+            log.info(changeEmail.toString());
+        }
 
     }
 
