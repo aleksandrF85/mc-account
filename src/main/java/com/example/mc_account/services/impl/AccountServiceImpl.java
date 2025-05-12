@@ -2,7 +2,6 @@ package com.example.mc_account.services.impl;
 
 
 import com.example.mc_account.dto.filter.AccountSearchDto;
-import com.example.mc_account.dto.filter.PageFilter;
 import com.example.mc_account.exception.AlreadyExistException;
 import com.example.mc_account.model.Account;
 import com.example.mc_account.reposirory.AccountRepository;
@@ -26,10 +25,10 @@ public class AccountServiceImpl implements AccountService {
     private final AccountRepository repository;
 
     @Override
-    public List<Account> search(AccountSearchDto searchFilter, PageFilter pageFilter) {
+    public List<Account> search(AccountSearchDto searchFilter, Integer page, Integer size) {
         return repository.findAll(
                 AccountSpecification.withFilter(searchFilter),
-                PageRequest.of(pageFilter.getPageNumber(), pageFilter.getPageSize())).getContent();
+                PageRequest.of(page, size)).getContent();
     }
 
     @Override

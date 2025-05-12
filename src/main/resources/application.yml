@@ -12,7 +12,7 @@ spring:
           jta:
             platform: enable
     hibernate:
-      ddl-auto: create #-drop #update
+      ddl-auto: update #create-drop
     generate-ddl: true
     show-sql: true
   datasource:
@@ -45,7 +45,8 @@ app:
     enable: true
     userRegistration: "REGISTER_TOP"
     resetPassword: "NOTIFICATION"
-    accountChanges: "ACCOUNT_CHANGES"
+    emailChange: "ACCOUNT_CHANGES"
+    accountChanges: "ACCOUNT_UPDATES"
     groupId: "socialNetwork-group-id"
 server:
   port: 8080

@@ -45,8 +45,6 @@ public class LoggingAspect {
 
         log.info("Request method: " + request.getMethod());
         log.info("Request URI: " + request.getRequestURI());
-        log.info("Header: " + request.getHeader("Authorization"));
-        log.info("Content: " + request.getContentType());
 
         if (!pathVariables.isEmpty()){
             log.info("Path Variables:");

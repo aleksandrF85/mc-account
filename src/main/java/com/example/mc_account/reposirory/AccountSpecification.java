@@ -7,6 +7,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.UUID;
 
 public interface AccountSpecification {
 
@@ -22,13 +23,16 @@ public interface AccountSpecification {
                 .and(byAge(accountFilter.getAgeFrom(), accountFilter.getAgeTo()));
     }
 
-    static Specification<Account> byAccountIds(List<Long> ids) {
+    static Specification<Account> byAccountIds(List<String> ids) {
 
         return ((root, query, criteriaBuilder) -> {
             if (ids == null || ids.isEmpty()) {
                 return null;
             }
-            return root.get("id").in(ids);
+
+            List<UUID> uuidList = ids.stream().map(UUID::fromString).toList();
+
+            return root.get("id").in(uuidList);
         });
     }
 
@@ -38,7 +42,7 @@ public interface AccountSpecification {
             if (author == null || author.isEmpty()) {
                 return null;
             }
-            return criteriaBuilder.equal(root.get("author"), author);
+            return criteriaBuilder.equal(root.get("firstName"), author);
         });
     }
 
@@ -102,21 +106,25 @@ public interface AccountSpecification {
 
     static Specification<Account> byAge(Integer ageFrom, Integer ageTo) {
 
-        OffsetDateTime birthdayFrom = OffsetDateTime.now().minusYears(ageFrom);
-        OffsetDateTime birthdayTo = OffsetDateTime.now().minusYears(ageTo);
 
         return ((root, query, criteriaBuilder) -> {
 
             if (ageFrom == null && ageTo == null || ageFrom == 0 && ageTo == 0) {
                 return null;
             }
+
+//            OffsetDateTime birthdayFrom = OffsetDateTime.now().minusYears(ageFrom);
+//            OffsetDateTime birthdayTo = OffsetDateTime.now().minusYears(ageTo);
+
             if (ageFrom == null || ageFrom <= 0) {
-                return criteriaBuilder.lessThanOrEqualTo(root.get("birthDate"), birthdayTo);
+
+                return criteriaBuilder.lessThanOrEqualTo(root.get("birthDate"), OffsetDateTime.now().minusYears(ageTo));
             }
             if (ageTo == null || ageTo <= 0) {
-                return criteriaBuilder.greaterThanOrEqualTo(root.get("birthDate"), birthdayFrom);
+
+                return criteriaBuilder.greaterThanOrEqualTo(root.get("birthDate"), OffsetDateTime.now().minusYears(ageFrom));
             }
-            return criteriaBuilder.between(root.get("birthDate"), birthdayFrom, birthdayTo);
+            return criteriaBuilder.between(root.get("birthDate"), OffsetDateTime.now().minusYears(ageFrom), OffsetDateTime.now().minusYears(ageTo));
         });
     }
 }
