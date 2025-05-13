@@ -21,7 +21,7 @@ public class BeanUtils {
             if (value != null &&
                     !value.toString().isEmpty() &&
                     !value.equals(List.of()) &&
-                    !value.getClass().getSimpleName().equals("boolean")) {
+                    !value.getClass().getSimpleName().equals("java.lang.Boolean")) {
                 field.set(destination, value);
             }
         }

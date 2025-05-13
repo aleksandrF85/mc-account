@@ -1,12 +1,11 @@
 package com.example.mc_account.services.impl;
 
 import com.example.mc_account.model.RoleType;
-import com.skillbox.auth.dto.events.*;
 import com.example.mc_account.model.Account;
 import com.example.mc_account.services.AccountService;
 import com.example.mc_account.services.KafkaService;
+import com.skillbox.auth.dto.events.*;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -38,7 +37,6 @@ public class KafkaServiceImpl implements KafkaService {
 
    }
 
-    @SneakyThrows
     @KafkaListener(topics = "${app.kafka.userRegistration}",
             groupId = "${app.kafka.groupId}",
             containerFactory = "userRegistrationEventKafkaListenerContainerFactory")
@@ -46,7 +44,7 @@ public class KafkaServiceImpl implements KafkaService {
     public void createAccountByUserRegistrationEvent(UserRegistrationEvent event) {
 
 
-        log.info("Received event: {}", event.getUserRegistration().toString());
+        log.info("Received event: {}", event.toString());
 
         Account account = new Account();
         UserRegistration userRegistration = event.getUserRegistration();
@@ -72,6 +70,8 @@ public class KafkaServiceImpl implements KafkaService {
     @Override
     public void resetPassword(ResetPasswordEvent event) {
 
+        log.info("Received event: {}", event.toString());
+
         ResetPassword resetPassword = event.getResetPassword();
 
         Account account = accountServiceImpl.findByEmail(resetPassword.getEmail());
@@ -81,5 +81,24 @@ public class KafkaServiceImpl implements KafkaService {
         log.info("Account updated: " + account);
 
     }
+
+    @KafkaListener(topics = "${app.kafka.emailChange}",
+            groupId = "${app.kafka.groupId}",
+            containerFactory = "changeEmailEventKafkaListenerContainerFactory")
+    @Override
+    public void changeEmail(ChangeEmailEvent event) {
+
+        log.info("Received event: {}", event.toString());
+
+        ChangeEmail changeEmail = event.getChangeEmail();
+
+        Account account = accountServiceImpl.findById(UUID.fromString(changeEmail.getUserId()));
+        account.setEmail(changeEmail.getEmail());
+
+        accountServiceImpl.update(account, account.getId());
+        log.info("Account updated: " + account);
+
+    }
+
 
 }
