@@ -118,13 +118,20 @@ public interface AccountSpecification {
 
             if (ageFrom == null || ageFrom <= 0) {
 
-                return criteriaBuilder.lessThanOrEqualTo(root.get("birthDate"), OffsetDateTime.now().minusYears(ageTo));
+                return criteriaBuilder.lessThanOrEqualTo(
+                        root.get("birthDate"),
+                        OffsetDateTime.now().minusYears(ageTo));
             }
             if (ageTo == null || ageTo <= 0) {
 
-                return criteriaBuilder.greaterThanOrEqualTo(root.get("birthDate"), OffsetDateTime.now().minusYears(ageFrom));
+                return criteriaBuilder.greaterThanOrEqualTo(
+                        root.get("birthDate"),
+                        OffsetDateTime.now().minusYears(ageFrom));
             }
-            return criteriaBuilder.between(root.get("birthDate"), OffsetDateTime.now().minusYears(ageFrom), OffsetDateTime.now().minusYears(ageTo));
+            return criteriaBuilder.between(
+                    root.get("birthDate"),
+                    OffsetDateTime.now().minusYears(ageFrom),
+                    OffsetDateTime.now().minusYears(ageTo));
         });
     }
 }

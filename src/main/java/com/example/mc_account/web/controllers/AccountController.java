@@ -12,6 +12,7 @@ import com.example.mc_account.model.Account;
 import com.example.mc_account.model.StatusCode;
 import com.example.mc_account.services.AccountService;
 import com.example.mc_account.services.KafkaService;
+import com.example.mc_account.utils.DtoUtils;
 import com.example.mc_account.utils.JwtTokenUtils;
 import com.skillbox.auth.dto.events.AccountChanges;
 import com.skillbox.auth.dto.events.AccountChangesEvent;
@@ -161,7 +162,19 @@ public class AccountController {
                                                                @RequestParam(required = false, defaultValue = "0") String page,
                                                                @RequestParam(required = false, defaultValue = "5") String size) {
 
-        AccountSearchDto request = new AccountSearchDto(author, ids, firstName, lastName, ageTo, ageFrom, country, city, Enum.valueOf(StatusCode.class, statusCode), isDelete);
+        AccountSearchDto request = new AccountSearchDto();
+
+        DtoUtils.setIfNotNull(author, request::setAuthor);
+        DtoUtils.setIfNotNull(ids, request::setIds);
+        DtoUtils.setIfNotNull(firstName, request::setFirstName);
+        DtoUtils.setIfNotNull(lastName, request::setLastName);
+        DtoUtils.setIfNotNull(ageTo, request::setAgeTo);
+        DtoUtils.setIfNotNull(ageFrom, request::setAgeFrom);
+        DtoUtils.setIfNotNull(country, request::setCountry);
+        DtoUtils.setIfNotNull(city, request::setCity);
+        DtoUtils.setIfNotNull(statusCode, code -> Enum.valueOf(StatusCode.class, code), request::setStatusCode);
+        request.setDeleted(isDelete);
+
         //TODO Уточнить дополнительные параметры поиска и ответ (должен быть Page?)
 
 
