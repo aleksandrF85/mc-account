@@ -25,17 +25,33 @@ public class KafkaServiceImpl implements KafkaService {
 
     @Value("${app.kafka.accountChanges}")
     private String accountChangesEventTopic;
+
+    @Value("${app.kafka.notification}")
+    private String notificationEventTopic;
     private final AccountService accountServiceImpl;
-    private final KafkaTemplate<String, AccountChangesEvent> template;
+    private final KafkaTemplate<String, AccountChangesEvent> accountChangesEventKafkaTemplate;
+
+    private final KafkaTemplate<String, NotificationEvent> notificationEventKafkaTemplate;
 
     @Override
     public void sendUserRegistrationEvent(AccountChangesEvent event) {
 
-        CompletableFuture<SendResult<String, AccountChangesEvent>> result = template.send(accountChangesEventTopic, event);
+        CompletableFuture<SendResult<String, AccountChangesEvent>> result =
+                accountChangesEventKafkaTemplate.send(accountChangesEventTopic, event);
 
         log.info("Sent event {}", event);
 
    }
+
+    @Override
+    public void sendNotificationEvent(NotificationEvent event) {
+
+        CompletableFuture<SendResult<String, NotificationEvent>> result =
+                notificationEventKafkaTemplate.send(notificationEventTopic, event);
+
+        log.info("Sent event {}", event);
+
+    }
 
     @KafkaListener(topics = "${app.kafka.userRegistration}",
             groupId = "${app.kafka.groupId}",

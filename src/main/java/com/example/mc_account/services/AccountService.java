@@ -28,4 +28,6 @@ public interface AccountService {
     Account findByEmail(String email);
 
     boolean existsByEmail(String email);
+
+    List<Account> findAllByIds(List<String> ids);
 }

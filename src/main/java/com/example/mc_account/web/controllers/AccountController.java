@@ -7,6 +7,7 @@ import com.example.mc_account.dto.AccountMeDto;
 import com.example.mc_account.dto.AccountResponseDto;
 import com.example.mc_account.dto.AccountUpdateDto;
 import com.example.mc_account.dto.filter.AccountSearchDto;
+import com.example.mc_account.events.*;
 import com.example.mc_account.mapper.AccountMapper;
 import com.example.mc_account.model.Account;
 import com.example.mc_account.model.StatusCode;
@@ -14,8 +15,6 @@ import com.example.mc_account.services.AccountService;
 import com.example.mc_account.services.KafkaService;
 import com.example.mc_account.utils.DtoUtils;
 import com.example.mc_account.utils.JwtTokenUtils;
-import com.example.mc_account.events.AccountChanges;
-import com.example.mc_account.events.AccountChangesEvent;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +25,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -54,6 +55,9 @@ public class AccountController {
 
 //        accountServiceImpl.isOnline(account.getId(), true);
         //TODO Уточнить когда помечать аккаунт online (при входе?)
+
+//        sendNotificationEvent(Collections.emptyList());
+        //TODO отправлять сообщения о днях рождения друзей
 
         return ResponseEntity.ok(
                 accountMapper.accountToMeDto(account));
@@ -223,6 +227,24 @@ public class AccountController {
         ));
 
         kafkaServiceImpl.sendUserRegistrationEvent(event);
+    }
+
+    public void sendNotificationEvent (List<String> ids){
+
+        for (Account account: accountServiceImpl.findAllByIds(ids)) {
+            if (account.getBirthDate().getDayOfYear() == LocalDateTime.now().getDayOfYear()){
+
+                NotificationEvent event = new NotificationEvent();
+                event.setEventId(UUID.randomUUID());
+                event.setId(account.getId()); //TODO уточнить поле
+                event.setNotificationType(NotificationType.FRIEND_BIRTHDAY);
+                event.setServiceName(MicroServiceName.MC_ACCOUNT);
+                event.setSentTime(LocalDateTime.now());
+                event.setContent("у пользователя " + account.getFirstName() + " " + account.getLastName() + " сегодня день рождения!");
+
+                kafkaServiceImpl.sendNotificationEvent(event);
+            }
+        }
     }
 
     private <T>  PageImpl<T> listToPage (List<T> list, String page, String size){

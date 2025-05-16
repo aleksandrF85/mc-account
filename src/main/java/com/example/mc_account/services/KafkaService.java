@@ -1,14 +1,13 @@
 package com.example.mc_account.services;
 
-import com.example.mc_account.events.AccountChangesEvent;
-import com.example.mc_account.events.ResetPasswordEvent;
-import com.example.mc_account.events.UserRegistrationEvent;
-import com.example.mc_account.events.ChangeEmailEvent;
+import com.example.mc_account.events.*;
 
 
 public interface KafkaService {
 
     void sendUserRegistrationEvent(AccountChangesEvent event);
+
+    void sendNotificationEvent(NotificationEvent event);
 
     void createAccountByUserRegistrationEvent(UserRegistrationEvent event);
 

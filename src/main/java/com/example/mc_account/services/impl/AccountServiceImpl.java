@@ -7,6 +7,7 @@ import com.example.mc_account.model.Account;
 import com.example.mc_account.reposirory.AccountRepository;
 import com.example.mc_account.reposirory.AccountSpecification;
 import com.example.mc_account.services.AccountService;
+import com.example.mc_account.services.KafkaService;
 import com.example.mc_account.utils.BeanUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,9 @@ import java.util.UUID;
 public class AccountServiceImpl implements AccountService {
 
     private final AccountRepository repository;
+
+    public final KafkaService kafkaServiceImpl;
+
 
     @Override
     public List<Account> search(AccountSearchDto searchFilter) {
@@ -117,6 +121,14 @@ public class AccountServiceImpl implements AccountService {
         }
 
         repository.save(account);
+    }
+
+    @Override
+    public List<Account> findAllByIds(List<String> ids){
+
+        List<UUID> uuidList = ids.stream().map(UUID::fromString).toList();
+
+        return repository.findAllById(uuidList);
     }
 
 }

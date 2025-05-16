@@ -47,6 +47,7 @@ app:
     resetPassword: "NOTIFICATION"
     emailChange: "ACCOUNT_CHANGES"
     accountChanges: "ACCOUNT_UPDATES"
+    notification: "account.events"
     groupId: "socialNetwork-group-id"
 server:
   port: 8080
