@@ -183,12 +183,8 @@ public class AccountController {
         List<AccountDataDto> accountDataDtoList = accountServiceImpl.search(request).stream()
                 .map(accountMapper::accountToDataDto)
                 .collect(Collectors.toList());
-        Pageable pageRequest = PageRequest.of(Integer.valueOf(page), Integer.valueOf(size));
-        int start = (int) pageRequest.getOffset();
-        int end = Math.min((start + pageRequest.getPageSize()), accountDataDtoList.size());
 
-        List<AccountDataDto> pageContent = accountDataDtoList.subList(start, end);
-        return ResponseEntity.ok(new PageImpl<>(pageContent, pageRequest, accountDataDtoList.size()));
+        return ResponseEntity.ok(listToPage(accountDataDtoList, page, size));
     }
 
     @GetMapping("/search/statusCode")
@@ -205,12 +201,8 @@ public class AccountController {
         List<AccountDataDto> accountDataDtoList = accountServiceImpl.search(request).stream()
                 .map(accountMapper::accountToDataDto)
                 .collect(Collectors.toList());
-        Pageable pageRequest = PageRequest.of(Integer.valueOf(page), Integer.valueOf(size));
-        int start = (int) pageRequest.getOffset();
-        int end = Math.min((start + pageRequest.getPageSize()), accountDataDtoList.size());
 
-        List<AccountDataDto> pageContent = accountDataDtoList.subList(start, end);
-        return ResponseEntity.ok(new PageImpl<>(pageContent, pageRequest, accountDataDtoList.size()));
+        return ResponseEntity.ok(listToPage(accountDataDtoList, page, size));
     }
 
     private void sendAccountChangesEvent(AccountUpdateDto request, String id) {
@@ -231,6 +223,15 @@ public class AccountController {
         ));
 
         kafkaServiceImpl.sendUserRegistrationEvent(event);
+    }
 
+    private <T>  PageImpl<T> listToPage (List<T> list, String page, String size){
+
+        Pageable pageRequest = PageRequest.of(Integer.valueOf(page), Integer.valueOf(size));
+        int start = (int) pageRequest.getOffset();
+        int end = Math.min((start + pageRequest.getPageSize()), list.size());
+
+        List<T> pageContent = list.subList(start, end);
+        return new PageImpl<>(pageContent, pageRequest, list.size());
     }
 }
