@@ -1,7 +1,6 @@
 package com.example.mc_account.dto.filter;
 
 import com.example.mc_account.model.StatusCode;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

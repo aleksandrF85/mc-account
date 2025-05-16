@@ -1,9 +1,9 @@
 package com.example.mc_account.services;
 
-import com.skillbox.auth.dto.events.AccountChangesEvent;
-import com.skillbox.auth.dto.events.ResetPasswordEvent;
-import com.skillbox.auth.dto.events.UserRegistrationEvent;
-import com.skillbox.auth.dto.events.ChangeEmailEvent;
+import com.example.mc_account.events.AccountChangesEvent;
+import com.example.mc_account.events.ResetPasswordEvent;
+import com.example.mc_account.events.UserRegistrationEvent;
+import com.example.mc_account.events.ChangeEmailEvent;
 
 
 public interface KafkaService {
