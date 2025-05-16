@@ -9,7 +9,7 @@ import java.util.UUID;
 public interface AccountService {
 
 
-    List<Account> search(AccountSearchDto filter, Integer page, Integer size);
+    List<Account> search(AccountSearchDto filter);
 
     List<Account> findAll();
 

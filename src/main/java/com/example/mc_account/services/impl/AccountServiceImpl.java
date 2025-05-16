@@ -10,7 +10,6 @@ import com.example.mc_account.services.AccountService;
 import com.example.mc_account.utils.BeanUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
@@ -25,10 +24,9 @@ public class AccountServiceImpl implements AccountService {
     private final AccountRepository repository;
 
     @Override
-    public List<Account> search(AccountSearchDto searchFilter, Integer page, Integer size) {
+    public List<Account> search(AccountSearchDto searchFilter) {
         return repository.findAll(
-                AccountSpecification.withFilter(searchFilter),
-                PageRequest.of(page, size)).getContent();
+                AccountSpecification.withFilter(searchFilter));
     }
 
     @Override

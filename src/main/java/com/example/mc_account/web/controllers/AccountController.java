@@ -19,6 +19,9 @@ import com.example.mc_account.events.AccountChangesEvent;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -49,7 +52,7 @@ public class AccountController {
 
         Account account = accountServiceImpl.findByEmail(email);
 
-        accountServiceImpl.isOnline(account.getId(), true);
+//        accountServiceImpl.isOnline(account.getId(), true);
         //TODO Уточнить когда помечать аккаунт online (при входе?)
 
         return ResponseEntity.ok(
@@ -149,18 +152,18 @@ public class AccountController {
 
     @GetMapping("/search")
     @Loggable
-    public ResponseEntity<List<AccountDataDto>> searchAccounts(@RequestParam(required = false)  String author,
-                                                               @RequestParam(required = false)  List<String> ids,
-                                                               @RequestParam(required = false)  String firstName,
-                                                               @RequestParam(required = false)  String lastName,
-                                                               @RequestParam(required = false)  Integer ageTo,
-                                                               @RequestParam(required = false)  Integer ageFrom,
-                                                               @RequestParam(required = false)  String country,
-                                                               @RequestParam(required = false)  String city,
-                                                               @RequestParam(required = false)  String statusCode,
-                                                               @RequestParam(required = false)  boolean isDelete,
-                                                               @RequestParam(required = false, defaultValue = "0") String page,
-                                                               @RequestParam(required = false, defaultValue = "5") String size) {
+    public ResponseEntity<PageImpl<AccountDataDto>> searchAccounts(@RequestParam(required = false)  String author,
+                                                                   @RequestParam(required = false)  List<String> ids,
+                                                                   @RequestParam(required = false)  String firstName,
+                                                                   @RequestParam(required = false)  String lastName,
+                                                                   @RequestParam(required = false)  Integer ageTo,
+                                                                   @RequestParam(required = false)  Integer ageFrom,
+                                                                   @RequestParam(required = false)  String country,
+                                                                   @RequestParam(required = false)  String city,
+                                                                   @RequestParam(required = false)  String statusCode,
+                                                                   @RequestParam(required = false)  boolean isDelete,
+                                                                   @RequestParam(required = false, defaultValue = "0") String page,
+                                                                   @RequestParam(required = false, defaultValue = "5") String size) {
 
         AccountSearchDto request = new AccountSearchDto();
 
@@ -177,16 +180,20 @@ public class AccountController {
 
         //TODO Уточнить дополнительные параметры поиска и ответ (должен быть Page?)
 
+        List<AccountDataDto> accountDataDtoList = accountServiceImpl.search(request).stream()
+                .map(accountMapper::accountToDataDto)
+                .collect(Collectors.toList());
+        Pageable pageRequest = PageRequest.of(Integer.valueOf(page), Integer.valueOf(size));
+        int start = (int) pageRequest.getOffset();
+        int end = Math.min((start + pageRequest.getPageSize()), accountDataDtoList.size());
 
-        return ResponseEntity.ok(
-                accountServiceImpl.search(request, Integer.parseInt(page), Integer.parseInt(size)).stream()
-                        .map(accountMapper::accountToDataDto)
-                        .collect(Collectors.toList()));
+        List<AccountDataDto> pageContent = accountDataDtoList.subList(start, end);
+        return ResponseEntity.ok(new PageImpl<>(pageContent, pageRequest, accountDataDtoList.size()));
     }
 
     @GetMapping("/search/statusCode")
     @Loggable
-    public ResponseEntity<List<AccountDataDto>> searchByStatusCode(@RequestParam(required = false)  String statusCode,
+    public ResponseEntity<PageImpl<AccountDataDto>> searchByStatusCode(@RequestParam(required = false)  String statusCode,
                                                                    @RequestParam(required = false, defaultValue = "0") String page,
                                                                    @RequestParam(required = false, defaultValue = "5")  String size) {
 
@@ -195,10 +202,15 @@ public class AccountController {
         AccountSearchDto request = new AccountSearchDto();
         request.setStatusCode(Enum.valueOf(StatusCode.class, statusCode));
 
-        return ResponseEntity.ok(
-                accountServiceImpl.search(request, Integer.parseInt(page), Integer.parseInt(size)).stream()
-                        .map(accountMapper::accountToDataDto)
-                        .collect(Collectors.toList()));
+        List<AccountDataDto> accountDataDtoList = accountServiceImpl.search(request).stream()
+                .map(accountMapper::accountToDataDto)
+                .collect(Collectors.toList());
+        Pageable pageRequest = PageRequest.of(Integer.valueOf(page), Integer.valueOf(size));
+        int start = (int) pageRequest.getOffset();
+        int end = Math.min((start + pageRequest.getPageSize()), accountDataDtoList.size());
+
+        List<AccountDataDto> pageContent = accountDataDtoList.subList(start, end);
+        return ResponseEntity.ok(new PageImpl<>(pageContent, pageRequest, accountDataDtoList.size()));
     }
 
     private void sendAccountChangesEvent(AccountUpdateDto request, String id) {

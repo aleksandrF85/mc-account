@@ -12,6 +12,8 @@ import java.util.UUID;
 public interface AccountSpecification {
 
     static Specification<Account> withFilter(AccountSearchDto accountFilter) {
+
+        System.out.println("Start search");
         return Specification.where(byAccountIds(accountFilter.getIds()))
                 .and(buAuthor(accountFilter.getAuthor()))
                 .and(byFirstName(accountFilter.getFirstName()))
