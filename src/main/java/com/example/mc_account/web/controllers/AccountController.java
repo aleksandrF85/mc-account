@@ -233,6 +233,8 @@ public class AccountController {
 
     public void sendNotificationEvent (List<String> ids){
 
+        log.info("Friends ids: [" + ids + "]");
+
         for (Account account: accountServiceImpl.findAllByIds(ids)) {
             if (account.getBirthDate().getDayOfYear() == LocalDateTime.now().getDayOfYear()){
 
