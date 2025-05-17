@@ -3,6 +3,7 @@ package com.example.mc_account.services.impl;
 import com.example.mc_account.events.*;
 import com.example.mc_account.model.RoleType;
 import com.example.mc_account.model.Account;
+import com.example.mc_account.model.StatusCode;
 import com.example.mc_account.services.AccountService;
 import com.example.mc_account.services.KafkaService;
 import lombok.RequiredArgsConstructor;
@@ -77,6 +78,7 @@ public class KafkaServiceImpl implements KafkaService {
         account.setPassword(userRegistration.getPassword());
         account.setRole(Set.of(Enum.valueOf(RoleType.class, userRegistration.getRole())));
         account.setRegDate(LocalDateTime.now());
+        account.setStatusCode(StatusCode.NONE);
         account.setDeleted(false);
         account.setBlocked(false);
         account.setOnline(false);

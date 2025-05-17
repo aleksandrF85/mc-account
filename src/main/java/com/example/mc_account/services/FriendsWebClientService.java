@@ -6,6 +6,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;
@@ -18,17 +19,40 @@ public class FriendsWebClientService {
     private final WebClient.Builder webClientBuilder;
 
 
+
     public List<String> getFriendsIds(String bearerToken) {
         return webClientBuilder.build()
                 .get()
                 .uri("http://mc-friends/api/friends/friendId")
                 .header(HttpHeaders.AUTHORIZATION, bearerToken)
                 .retrieve()
+
+                // Обработка ошибок HTTP уровня (5xx)
+                .onStatus(
+                        status -> status.is5xxServerError(),
+                        clientResponse -> clientResponse.bodyToMono(String.class)
+                                .flatMap(errorBody -> {
+                                    System.err.println("Ошибка сервиса mc-friends (5xx): " + errorBody);
+                                    return Mono.error(new RuntimeException("Ошибка mc-friends: " + clientResponse.statusCode()));
+                                })
+                )
+
+                // Преобразуем тело в List<String>
                 .bodyToMono(new ParameterizedTypeReference<List<String>>() {})
-                    .onErrorResume(Exception.class, ex -> {
-                        System.err.println("Ошибка: " + ex.getMessage());
-                        return Mono.just(Collections.emptyList());
-                    })
+
+                // Ошибка при недоступности сервиса (например, DNS, таймаут)
+                .onErrorResume(WebClientRequestException.class, ex -> {
+                    System.err.println("Сервис mc-friends недоступен: " + ex.getMessage());
+                    return Mono.just(Collections.emptyList());
+                })
+
+                // Общая обработка любых других исключений
+                .onErrorResume(Exception.class, ex -> {
+                    System.err.println("Неизвестная ошибка при вызове mc-friends: " + ex.getMessage());
+                    return Mono.just(Collections.emptyList());
+                })
+
+                // Блокируем для получения результата (если нужен синхронный вызов)
                 .block();
     }
     public List<String> getIdsByStatusCode(String bearerToken, String statusCode) {
@@ -38,11 +62,34 @@ public class FriendsWebClientService {
                         statusCode)
                 .header(HttpHeaders.AUTHORIZATION, bearerToken)
                 .retrieve()
+
+                // Обработка ошибок HTTP уровня (5xx)
+                .onStatus(
+                        status -> status.is5xxServerError(),
+                        clientResponse -> clientResponse.bodyToMono(String.class)
+                                .flatMap(errorBody -> {
+                                    System.err.println("Ошибка сервиса mc-friends (5xx): " + errorBody);
+                                    return Mono.error(new RuntimeException("Ошибка mc-friends: " + clientResponse.statusCode()));
+                                })
+                )
+
+                // Преобразуем тело в List<String>
                 .bodyToMono(new ParameterizedTypeReference<List<String>>() {})
-                .onErrorResume(Exception.class, ex -> {
-                    System.err.println("Ошибка: " + ex.getMessage());
+
+                // Ошибка при недоступности сервиса (например, DNS, таймаут)
+                .onErrorResume(WebClientRequestException.class, ex -> {
+                    System.err.println("Сервис mc-friends недоступен: " + ex.getMessage());
                     return Mono.just(Collections.emptyList());
                 })
+
+                // Общая обработка любых других исключений
+                .onErrorResume(Exception.class, ex -> {
+                    System.err.println("Неизвестная ошибка при вызове mc-friends: " + ex.getMessage());
+                    return Mono.just(Collections.emptyList());
+                })
+
+                // Блокируем для получения результата (если нужен синхронный вызов)
                 .block();
     }
+
 }

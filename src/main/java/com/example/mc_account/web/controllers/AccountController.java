@@ -198,17 +198,25 @@ public class AccountController {
 
     @GetMapping("/search/statusCode")
     @Loggable
-    public ResponseEntity<PageImpl<AccountDataDto>> searchByStatusCode(@RequestParam(required = false)  String statusCode,
-                                                                   @RequestParam(required = false, defaultValue = "0") String page,
-                                                                   @RequestParam(required = false, defaultValue = "5")  String size) {
+    public ResponseEntity<PageImpl<AccountDataDto>> searchByStatusCode(@RequestHeader(value = "Authorization") String bearerToken,
+                                                                       @RequestParam(required = false)  String statusCode,
+                                                                       @RequestParam(required = false, defaultValue = "0") String page,
+                                                                       @RequestParam(required = false, defaultValue = "5")  String size) {
 
         //TODO Уточнить дополнительные параметры поиска и ответ (должен быть Page?)
 
         AccountSearchDto request = new AccountSearchDto();
-        request.setStatusCode(Enum.valueOf(StatusCode.class, statusCode));
+//        request.setStatusCode(Enum.valueOf(StatusCode.class, statusCode));
+
+//        List<AccountDataDto> accountDataDtoList = accountServiceImpl.search(request).stream()
+//                .map(accountMapper::accountToDataDto)
+//                .collect(Collectors.toList());
+
+        request.setIds(friendsWebClientService.getIdsByStatusCode(bearerToken, statusCode));
 
         List<AccountDataDto> accountDataDtoList = accountServiceImpl.search(request).stream()
                 .map(accountMapper::accountToDataDto)
+                .peek(accountDataDto -> accountDataDto.setStatusCode(Enum.valueOf(StatusCode.class, statusCode)))
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(listToPage(accountDataDtoList, page, size));
