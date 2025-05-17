@@ -7,6 +7,7 @@ import com.example.mc_account.services.AccountService;
 import com.example.mc_account.services.KafkaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.SendResult;
@@ -20,7 +21,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 public class KafkaServiceImpl implements KafkaService {
 
     @Value("${app.kafka.accountChanges}")
@@ -28,10 +29,14 @@ public class KafkaServiceImpl implements KafkaService {
 
     @Value("${app.kafka.notification}")
     private String notificationEventTopic;
-    private final AccountService accountServiceImpl;
-    private final KafkaTemplate<String, AccountChangesEvent> accountChangesEventKafkaTemplate;
+    @Autowired
+    private AccountService accountServiceImpl;
 
-    private final KafkaTemplate<String, NotificationEvent> notificationEventKafkaTemplate;
+    @Autowired
+    private KafkaTemplate<String, AccountChangesEvent> accountChangesEventKafkaTemplate;
+
+    @Autowired
+    private KafkaTemplate<String, NotificationEvent> notificationEventKafkaTemplate;
 
     @Override
     public void sendUserRegistrationEvent(AccountChangesEvent event) {
