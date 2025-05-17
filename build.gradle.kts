@@ -33,6 +33,7 @@ dependencies {
     implementation("org.liquibase:liquibase-core")
     implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
     implementation("org.springframework.kafka:spring-kafka")
+    implementation ("org.springframework.boot:spring-boot-starter-webflux")
 //    implementation("org.springframework.boot:spring-boot-starter-websocket")
 //    implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("com.nimbusds:nimbus-jose-jwt:9.30")

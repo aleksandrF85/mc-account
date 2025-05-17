@@ -12,6 +12,7 @@ import com.example.mc_account.mapper.AccountMapper;
 import com.example.mc_account.model.Account;
 import com.example.mc_account.model.StatusCode;
 import com.example.mc_account.services.AccountService;
+import com.example.mc_account.services.FriendsWebClientService;
 import com.example.mc_account.services.KafkaService;
 import com.example.mc_account.utils.DtoUtils;
 import com.example.mc_account.utils.JwtTokenUtils;
@@ -26,7 +27,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -44,6 +44,8 @@ public class AccountController {
 
     public final KafkaService kafkaServiceImpl;
 
+    private final FriendsWebClientService friendsWebClientService;
+
     @GetMapping("/me")
     @Loggable
     public ResponseEntity<AccountMeDto> getCurrentAccount(@RequestHeader(value = "Authorization") String bearerToken) {
@@ -56,7 +58,7 @@ public class AccountController {
 //        accountServiceImpl.isOnline(account.getId(), true);
         //TODO Уточнить когда помечать аккаунт online (при входе?)
 
-//        sendNotificationEvent(Collections.emptyList());
+        sendNotificationEvent(friendsWebClientService.getFriendsIds(bearerToken));
         //TODO отправлять сообщения о днях рождения друзей
 
         return ResponseEntity.ok(
