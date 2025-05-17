@@ -58,7 +58,10 @@ public class AccountController {
 //        accountServiceImpl.isOnline(account.getId(), true);
         //TODO Уточнить когда помечать аккаунт online (при входе?)
 
-        sendNotificationEvent(friendsWebClientService.getFriendsIds(bearerToken));
+        List<String> ids = friendsWebClientService.getFriendsIds(bearerToken);
+        log.info("Friends ids: [" + ids + "]");
+
+        if (!ids.isEmpty()){sendNotificationEvent(ids);}
         //TODO отправлять сообщения о днях рождения друзей
 
         return ResponseEntity.ok(
@@ -232,8 +235,6 @@ public class AccountController {
     }
 
     public void sendNotificationEvent (List<String> ids){
-
-        log.info("Friends ids: [" + ids + "]");
 
         for (Account account: accountServiceImpl.findAllByIds(ids)) {
             if (account.getBirthDate().getDayOfYear() == LocalDateTime.now().getDayOfYear()){

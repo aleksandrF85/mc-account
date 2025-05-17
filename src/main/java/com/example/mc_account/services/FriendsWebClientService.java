@@ -3,9 +3,12 @@ package com.example.mc_account.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -22,6 +25,10 @@ public class FriendsWebClientService {
                 .header(HttpHeaders.AUTHORIZATION, bearerToken)
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<List<String>>() {})
+                    .onErrorResume(Exception.class, ex -> {
+                        System.err.println("Ошибка: " + ex.getMessage());
+                        return Mono.just(Collections.emptyList());
+                    })
                 .block();
     }
     public List<String> getIdsByStatusCode(String bearerToken, String statusCode) {
@@ -32,6 +39,10 @@ public class FriendsWebClientService {
                 .header(HttpHeaders.AUTHORIZATION, bearerToken)
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<List<String>>() {})
+                .onErrorResume(Exception.class, ex -> {
+                    System.err.println("Ошибка: " + ex.getMessage());
+                    return Mono.just(Collections.emptyList());
+                })
                 .block();
     }
 }
