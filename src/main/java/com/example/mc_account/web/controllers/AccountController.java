@@ -28,10 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -195,19 +192,19 @@ public class AccountController {
                 .filter(account -> !account.getId().equals(currentUserId))
                 .collect(Collectors.toList());
 
-        if (statusCode != null) {
+        if (statusCode != null && !statusCode.isEmpty()) {
             Set<UUID> allowedIds = friendsWebClientService.getIdsByStatusCode(bearerToken, statusCode).stream()
                     .map(UUID::fromString)
                     .collect(Collectors.toSet());
 
             accountList = accountList.stream()
                     .filter(account -> allowedIds.contains(account.getId()))
+                    .peek(account -> account.setStatusCode(Enum.valueOf(StatusCode.class, statusCode)))
                     .collect(Collectors.toList());
         }
 
         List<AccountDataDto> accountDataDtoList = accountList.stream()
                 .map(accountMapper::accountToDataDto)
-                .peek(account -> account.setStatusCode(Enum.valueOf(StatusCode.class, statusCode)))
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(listToPage(accountDataDtoList, page, size));
@@ -227,11 +224,14 @@ public class AccountController {
         request.setIds(friendsWebClientService.getIdsByStatusCode(bearerToken, statusCode));
         request.setDeleted(false);
 
-        List<AccountDataDto> accountDataDtoList = accountServiceImpl.search(request).stream()
-                .map(accountMapper::accountToDataDto)
-                .peek(accountDataDto -> accountDataDto.setStatusCode(Enum.valueOf(StatusCode.class, statusCode)))
-                .collect(Collectors.toList());
+        List<AccountDataDto> accountDataDtoList = new ArrayList<>();
 
+        if (!request.getIds().isEmpty()) {
+            accountDataDtoList = accountServiceImpl.search(request).stream()
+                    .map(accountMapper::accountToDataDto)
+                    .peek(accountDataDto -> accountDataDto.setStatusCode(Enum.valueOf(StatusCode.class, statusCode)))
+                    .collect(Collectors.toList());
+        }
         return ResponseEntity.ok(listToPage(accountDataDtoList, page, size));
     }
 
@@ -275,7 +275,7 @@ public class AccountController {
 
     private <T>  PageImpl<T> listToPage (List<T> list, String page, String size){
 
-        Pageable pageRequest = PageRequest.of(Integer.valueOf(page), Integer.valueOf(size));
+        Pageable pageRequest = PageRequest.of(Integer.parseInt(page), Integer.parseInt(size));
         int start = (int) pageRequest.getOffset();
         int end = Math.min((start + pageRequest.getPageSize()), list.size());
 
