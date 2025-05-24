@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -54,9 +55,9 @@ public class AccountController {
         Map<String, Object> claims = JwtTokenUtils.parseJwtToken(bearerToken);
         String email = claims.get("sub").toString();
 
-        Account account = accountServiceImpl.findByEmail(email);
+        Account currentUser = accountServiceImpl.findByEmail(email);
 
-        accountServiceImpl.isOnline(account.getId(), true);
+        accountServiceImpl.isOnline(currentUser.getId(), true);
         //TODO Уточнить когда помечать аккаунт online (при входе?)
 
         List<String> ids = friendsWebClientService.getFriendsIds(bearerToken);
@@ -66,7 +67,7 @@ public class AccountController {
         //TODO отправлять сообщения о днях рождения друзей
 
         return ResponseEntity.ok(
-                accountMapper.accountToMeDto(account));
+                accountMapper.accountToMeDto(currentUser));
     }
 
     @PutMapping("/me")
@@ -75,13 +76,13 @@ public class AccountController {
                                                              @RequestBody AccountUpdateDto request) {
 
         String email = JwtTokenUtils.parseJwtToken(bearerToken).get("sub").toString();
-        UUID id = accountServiceImpl.findByEmail(email).getId();
+        UUID currentUserId = accountServiceImpl.findByEmail(email).getId();
 
-        sendAccountChangesEvent(request, id.toString());
+        sendAccountChangesEvent(request, currentUserId.toString());
 
         return ResponseEntity.ok(
                 accountMapper.accountToMeDto(
-                        accountServiceImpl.update(accountMapper.updateDtoToAccount(request), id)));
+                        accountServiceImpl.update(accountMapper.updateDtoToAccount(request), currentUserId)));
     }
 
     @DeleteMapping("/me")
@@ -89,9 +90,9 @@ public class AccountController {
     public ResponseEntity<Void> markAccountAsDeleted(@RequestHeader(value = "Authorization") String bearerToken) {
 
         String email = JwtTokenUtils.parseJwtToken(bearerToken).get("sub").toString();
-        UUID id = accountServiceImpl.findByEmail(email).getId();
+        UUID currentUserId = accountServiceImpl.findByEmail(email).getId();
 
-        accountServiceImpl.deleteById(id);
+        accountServiceImpl.deleteById(currentUserId);
 
         return ResponseEntity.ok().build();
     }
@@ -177,7 +178,6 @@ public class AccountController {
                                                                    @RequestParam(required = false, defaultValue = "5") String size) {
 
         AccountSearchDto request = new AccountSearchDto();
-
         DtoUtils.setIfNotNull(author, request::setAuthor);
         DtoUtils.setIfNotNull(ids, request::setIds);
         DtoUtils.setIfNotNull(firstName, request::setFirstName);
@@ -186,17 +186,28 @@ public class AccountController {
         DtoUtils.setIfNotNull(ageFrom, request::setAgeFrom);
         DtoUtils.setIfNotNull(country, request::setCountry);
         DtoUtils.setIfNotNull(city, request::setCity);
-        DtoUtils.setIfNotNull(statusCode, code -> Enum.valueOf(StatusCode.class, code), request::setStatusCode);
         request.setDeleted(isDelete);
 
-        //TODO Уточнить параметры поиска и ответ
-
         String email = JwtTokenUtils.parseJwtToken(bearerToken).get("sub").toString();
-        String id = accountServiceImpl.findByEmail(email).getId().toString();
+        UUID currentUserId = accountServiceImpl.findByEmail(email).getId();
 
-        List<AccountDataDto> accountDataDtoList = accountServiceImpl.search(request).stream()
+        List<Account> accountList = accountServiceImpl.search(request).stream()
+                .filter(account -> !account.getId().equals(currentUserId))
+                .collect(Collectors.toList());
+
+        if (statusCode != null) {
+            Set<UUID> allowedIds = friendsWebClientService.getIdsByStatusCode(bearerToken, statusCode).stream()
+                    .map(UUID::fromString)
+                    .collect(Collectors.toSet());
+
+            accountList = accountList.stream()
+                    .filter(account -> allowedIds.contains(account.getId()))
+                    .collect(Collectors.toList());
+        }
+
+        List<AccountDataDto> accountDataDtoList = accountList.stream()
                 .map(accountMapper::accountToDataDto)
-                .filter(dto -> !dto.getId().equals(id))
+                .peek(account -> account.setStatusCode(Enum.valueOf(StatusCode.class, statusCode)))
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(listToPage(accountDataDtoList, page, size));
@@ -212,13 +223,9 @@ public class AccountController {
         //TODO Уточнить параметры поиска и ответ
 
         AccountSearchDto request = new AccountSearchDto();
-//        request.setStatusCode(Enum.valueOf(StatusCode.class, statusCode));
-
-//        List<AccountDataDto> accountDataDtoList = accountServiceImpl.search(request).stream()
-//                .map(accountMapper::accountToDataDto)
-//                .collect(Collectors.toList());
 
         request.setIds(friendsWebClientService.getIdsByStatusCode(bearerToken, statusCode));
+        request.setDeleted(false);
 
         List<AccountDataDto> accountDataDtoList = accountServiceImpl.search(request).stream()
                 .map(accountMapper::accountToDataDto)

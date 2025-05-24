@@ -13,14 +13,12 @@ public interface AccountSpecification {
 
     static Specification<Account> withFilter(AccountSearchDto accountFilter) {
 
-        System.out.println("Start search");
         return Specification.where(byAccountIds(accountFilter.getIds()))
-                .and(buAuthor(accountFilter.getAuthor()))  //TODO уточнить параметры поиска по Автору
+                .and(byAuthor(accountFilter.getAuthor()))
                 .and(byFirstName(accountFilter.getFirstName()))
                 .and(byLastName(accountFilter.getLastName()))
                 .and(byCity(accountFilter.getCity()))
                 .and(byCountry(accountFilter.getCountry()))
-//                .and(byStatusCode(accountFilter.getStatusCode()))
                 .and(isDeleted(accountFilter.isDeleted()))
                 .and(byAge(accountFilter.getAgeFrom(), accountFilter.getAgeTo()));
     }
@@ -38,13 +36,16 @@ public interface AccountSpecification {
         });
     }
 
-    static Specification<Account> buAuthor(String author) {
-        return ((root, query, criteriaBuilder) -> {
+    static Specification<Account> byAuthor(String author) {
+        return (root, query, cb) -> {
             if (author == null || author.isEmpty()) {
                 return null;
             }
-            return criteriaBuilder.equal(root.get("firstName"), author);
-        });
+            return cb.or(
+                    cb.like(cb.lower(root.get("firstName")), "%" + author.toLowerCase() + "%"),
+                    cb.like(cb.lower(root.get("lastName")), "%" + author.toLowerCase() + "%")
+            );
+        };
     }
 
     static Specification<Account> byFirstName(String firstName) {
@@ -96,44 +97,29 @@ public interface AccountSpecification {
 
         return ((root, query, criteriaBuilder) ->
                 criteriaBuilder.equal(root.get("deleted"), deleted));
-//        return ((root, query, criteriaBuilder) ->
-//        {
-//            if (deleted){
-//                return criteriaBuilder.isTrue(root.get("deleted"));
-//            }
-//            return criteriaBuilder.isFalse(root.get("deleted"));
-//        });
     }
 
     static Specification<Account> byAge(Integer ageFrom, Integer ageTo) {
+        return (root, query, cb) -> {
+            OffsetDateTime now = OffsetDateTime.now();
 
-
-        return ((root, query, criteriaBuilder) -> {
-
-            if (ageFrom == null && ageTo == null || ageFrom == 0 && ageTo == 0) {
+            if ((ageFrom == null || ageFrom <= 0) && (ageTo == null || ageTo <= 0)) {
                 return null;
             }
 
-//            OffsetDateTime birthdayFrom = OffsetDateTime.now().minusYears(ageFrom);
-//            OffsetDateTime birthdayTo = OffsetDateTime.now().minusYears(ageTo);
-
-            if (ageFrom == null || ageFrom <= 0) {
-
-                return criteriaBuilder.lessThanOrEqualTo(
-                        root.get("birthDate"),
-                        OffsetDateTime.now().minusYears(ageTo));
+            if (ageFrom != null && ageFrom > 0 && (ageTo == null || ageTo <= 0)) {
+                return cb.lessThanOrEqualTo(root.get("birthDate"), now.minusYears(ageFrom));
             }
-            if (ageTo == null || ageTo <= 0) {
 
-                return criteriaBuilder.greaterThanOrEqualTo(
-                        root.get("birthDate"),
-                        OffsetDateTime.now().minusYears(ageFrom));
+            if (ageTo != null && ageTo > 0 && (ageFrom == null || ageFrom <= 0)) {
+                return cb.greaterThanOrEqualTo(root.get("birthDate"), now.minusYears(ageTo));
             }
-            return criteriaBuilder.between(
-                    root.get("birthDate"),
-                    OffsetDateTime.now().minusYears(ageFrom),
-                    OffsetDateTime.now().minusYears(ageTo));
-        });
+
+            OffsetDateTime fromDate = now.minusYears(ageTo);
+            OffsetDateTime toDate = now.minusYears(ageFrom);
+
+            return cb.between(root.get("birthDate"), fromDate, toDate);
+        };
     }
 }
 

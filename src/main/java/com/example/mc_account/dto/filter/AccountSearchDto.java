@@ -18,7 +18,6 @@ public class AccountSearchDto {
     private int ageFrom;
     private String country;
     private String city;
-    private StatusCode statusCode;
     private boolean isDeleted;
 
 }
