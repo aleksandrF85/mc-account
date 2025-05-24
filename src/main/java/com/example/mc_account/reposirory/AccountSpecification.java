@@ -15,12 +15,12 @@ public interface AccountSpecification {
 
         System.out.println("Start search");
         return Specification.where(byAccountIds(accountFilter.getIds()))
-                .and(buAuthor(accountFilter.getAuthor()))
+                .and(buAuthor(accountFilter.getAuthor()))  //TODO уточнить параметры поиска по Автору
                 .and(byFirstName(accountFilter.getFirstName()))
                 .and(byLastName(accountFilter.getLastName()))
                 .and(byCity(accountFilter.getCity()))
                 .and(byCountry(accountFilter.getCountry()))
-                .and(byStatusCode(accountFilter.getStatusCode()))
+//                .and(byStatusCode(accountFilter.getStatusCode()))
                 .and(isDeleted(accountFilter.isDeleted()))
                 .and(byAge(accountFilter.getAgeFrom(), accountFilter.getAgeTo()));
     }
@@ -38,7 +38,6 @@ public interface AccountSpecification {
         });
     }
 
-    //TODO уточнить параметры поиска по Автору
     static Specification<Account> buAuthor(String author) {
         return ((root, query, criteriaBuilder) -> {
             if (author == null || author.isEmpty()) {

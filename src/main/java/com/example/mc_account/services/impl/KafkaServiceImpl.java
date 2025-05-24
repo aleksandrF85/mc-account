@@ -1,24 +1,20 @@
 package com.example.mc_account.services.impl;
 
 import com.example.mc_account.events.*;
-import com.example.mc_account.model.RoleType;
+import com.example.mc_account.mapper.AccountMapper;
 import com.example.mc_account.model.Account;
-import com.example.mc_account.model.StatusCode;
 import com.example.mc_account.services.AccountService;
 import com.example.mc_account.services.KafkaService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
-import java.util.concurrent.CompletableFuture;
 
-import java.time.LocalDateTime;
-import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -32,6 +28,9 @@ public class KafkaServiceImpl implements KafkaService {
     private String notificationEventTopic;
     @Autowired
     private AccountService accountServiceImpl;
+
+    @Autowired
+    private AccountMapper accountMapper;
 
     @Autowired
     private KafkaTemplate<String, AccountChangesEvent> accountChangesEventKafkaTemplate;
@@ -68,20 +67,20 @@ public class KafkaServiceImpl implements KafkaService {
 
         log.info("Received event: {}", event.toString());
 
-        Account account = new Account();
-        UserRegistration userRegistration = event.getUserRegistration();
-
-        account.setEmail(userRegistration.getEmail());
-        account.setFirstName(userRegistration.getFirstName());
-        account.setLastName(userRegistration.getLastName());
-        account.setId(UUID.fromString(userRegistration.getUserId()));
-        account.setPassword(userRegistration.getPassword());
-        account.setRole(Set.of(Enum.valueOf(RoleType.class, userRegistration.getRole())));
-        account.setRegDate(LocalDateTime.now());
-        account.setStatusCode(StatusCode.NONE);
-        account.setDeleted(false);
-        account.setBlocked(false);
-        account.setOnline(false);
+        Account account = accountMapper.userRegistrationToAccount(event.getUserRegistration());
+//        UserRegistration userRegistration = event.getUserRegistration();
+//
+//        account.setEmail(userRegistration.getEmail());
+//        account.setFirstName(userRegistration.getFirstName());
+//        account.setLastName(userRegistration.getLastName());
+//        account.setId(UUID.fromString(userRegistration.getUserId()));
+//        account.setPassword(userRegistration.getPassword());
+//        account.setRole(Set.of(Enum.valueOf(RoleType.class, userRegistration.getRole())));
+//        account.setRegDate(LocalDateTime.now());
+//        account.setStatusCode(StatusCode.NONE);
+//        account.setDeleted(false);
+//        account.setBlocked(false);
+//        account.setOnline(false);
 
         accountServiceImpl.create(account);
         log.info("Account created: " + account);

@@ -10,7 +10,6 @@ import com.example.mc_account.services.AccountService;
 import com.example.mc_account.services.KafkaService;
 import com.example.mc_account.utils.BeanUtils;
 import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -116,7 +115,7 @@ public class AccountServiceImpl implements AccountService {
 
         if (isOnline) {
             account.setOnline(true);
-            account.setLastOnlineTime(null);
+            account.setLastOnlineTime(LocalDateTime.now());
         } else {
             account.setLastOnlineTime(LocalDateTime.now());
             account.setOnline(false);

@@ -55,7 +55,7 @@ public class AccountController {
 
         Account account = accountServiceImpl.findByEmail(email);
 
-//        accountServiceImpl.isOnline(account.getId(), true);
+        accountServiceImpl.isOnline(account.getId(), true);
         //TODO Уточнить когда помечать аккаунт online (при входе?)
 
         List<String> ids = friendsWebClientService.getFriendsIds(bearerToken);
@@ -187,7 +187,7 @@ public class AccountController {
         DtoUtils.setIfNotNull(statusCode, code -> Enum.valueOf(StatusCode.class, code), request::setStatusCode);
         request.setDeleted(isDelete);
 
-        //TODO Уточнить дополнительные параметры поиска и ответ (должен быть Page?)
+        //TODO Уточнить параметры поиска и ответ
 
         List<AccountDataDto> accountDataDtoList = accountServiceImpl.search(request).stream()
                 .map(accountMapper::accountToDataDto)
@@ -203,7 +203,7 @@ public class AccountController {
                                                                        @RequestParam(required = false, defaultValue = "0") String page,
                                                                        @RequestParam(required = false, defaultValue = "5")  String size) {
 
-        //TODO Уточнить дополнительные параметры поиска и ответ (должен быть Page?)
+        //TODO Уточнить параметры поиска и ответ
 
         AccountSearchDto request = new AccountSearchDto();
 //        request.setStatusCode(Enum.valueOf(StatusCode.class, statusCode));

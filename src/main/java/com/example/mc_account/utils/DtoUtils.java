@@ -1,9 +1,9 @@
 package com.example.mc_account.utils;
 
+import lombok.experimental.UtilityClass;
+
 import java.util.function.Consumer;
 import java.util.function.Function;
-
-import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class DtoUtils {

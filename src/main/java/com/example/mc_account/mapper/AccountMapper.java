@@ -4,8 +4,10 @@ import com.example.mc_account.dto.AccountDataDto;
 import com.example.mc_account.dto.AccountMeDto;
 import com.example.mc_account.dto.AccountResponseDto;
 import com.example.mc_account.dto.AccountUpdateDto;
+import com.example.mc_account.events.UserRegistration;
 import com.example.mc_account.model.Account;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.ReportingPolicy;
 
@@ -22,5 +24,14 @@ public interface AccountMapper {
     AccountMeDto accountToMeDto(Account response);
 
     AccountDataDto accountToDataDto(Account response);
+
+    @Mapping(target = "id", expression = "java(UUID.fromString(registration.getUserId()))")
+    @Mapping(target = "role", expression = "java(Set.of(RoleType.valueOf(registration.getRole())))")
+    @Mapping(target = "regDate", expression = "java(java.time.LocalDateTime.now())")
+    @Mapping(target = "statusCode", constant = "NONE")
+    @Mapping(target = "deleted", constant = "false")
+    @Mapping(target = "blocked", constant = "false")
+    @Mapping(target = "online", constant = "false")
+    Account userRegistrationToAccount(UserRegistration registration);
 
 }
