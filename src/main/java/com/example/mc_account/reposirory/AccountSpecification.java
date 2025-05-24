@@ -37,13 +37,13 @@ public interface AccountSpecification {
     }
 
     static Specification<Account> byAuthor(String author) {
-        return (root, query, cb) -> {
+        return (root, query, criteriaBuilder) -> {
             if (author == null || author.isEmpty()) {
                 return null;
             }
-            return cb.or(
-                    cb.like(cb.lower(root.get("firstName")), "%" + author.toLowerCase() + "%"),
-                    cb.like(cb.lower(root.get("lastName")), "%" + author.toLowerCase() + "%")
+            return criteriaBuilder.or(
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), "%" + author.toLowerCase() + "%"),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), "%" + author.toLowerCase() + "%")
             );
         };
     }
@@ -53,7 +53,7 @@ public interface AccountSpecification {
             if (firstName == null || firstName.isEmpty()) {
                 return null;
             }
-            return criteriaBuilder.equal(root.get("firstName"), firstName);
+            return criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), "%" + firstName.toLowerCase() + "%");
         });
     }
 
@@ -62,7 +62,7 @@ public interface AccountSpecification {
             if (lastName == null || lastName.isEmpty()) {
                 return null;
             }
-            return criteriaBuilder.equal(root.get("lastName"), lastName);
+            return criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), "%" + lastName.toLowerCase() + "%");
         });
     }
 
