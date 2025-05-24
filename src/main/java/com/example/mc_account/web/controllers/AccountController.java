@@ -19,6 +19,7 @@ import com.example.mc_account.utils.JwtTokenUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -161,7 +162,8 @@ public class AccountController {
 
     @GetMapping("/search")
     @Loggable
-    public ResponseEntity<PageImpl<AccountDataDto>> searchAccounts(@RequestParam(required = false)  String author,
+    public ResponseEntity<PageImpl<AccountDataDto>> searchAccounts(@RequestHeader(value = "Authorization") String bearerToken,
+                                                                   @RequestParam(required = false)  String author,
                                                                    @RequestParam(required = false)  List<String> ids,
                                                                    @RequestParam(required = false)  String firstName,
                                                                    @RequestParam(required = false)  String lastName,
@@ -189,8 +191,12 @@ public class AccountController {
 
         //TODO Уточнить параметры поиска и ответ
 
+        String email = JwtTokenUtils.parseJwtToken(bearerToken).get("sub").toString();
+        String id = accountServiceImpl.findByEmail(email).getId().toString();
+
         List<AccountDataDto> accountDataDtoList = accountServiceImpl.search(request).stream()
                 .map(accountMapper::accountToDataDto)
+                .filter(dto -> !dto.getId().equals(id))
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(listToPage(accountDataDtoList, page, size));

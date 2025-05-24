@@ -22,7 +22,7 @@ public class FriendsWebClientService {
     public List<String> getFriendsIds(String bearerToken) {
         return webClientBuilder.build()
                 .get()
-                .uri("http://mc-friends/api/friends/friendId")
+                .uri("lb://mc-friends/api/friends/friendId")
                 .header(HttpHeaders.AUTHORIZATION, bearerToken)
                 .retrieve()
 
@@ -57,8 +57,7 @@ public class FriendsWebClientService {
     public List<String> getIdsByStatusCode(String bearerToken, String statusCode) {
         return webClientBuilder.build()
                 .get()
-                .uri("http://mc-friends/api/friends/status/{status}",
-                        statusCode)
+                .uri("lb://mc-friends/api/friends/status/{status}", statusCode)
                 .header(HttpHeaders.AUTHORIZATION, bearerToken)
                 .retrieve()
 
