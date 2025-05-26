@@ -8,12 +8,12 @@ import com.example.mc_account.reposirory.AccountRepository;
 import com.example.mc_account.reposirory.AccountSpecification;
 import com.example.mc_account.services.AccountService;
 import com.example.mc_account.services.KafkaService;
+import com.example.mc_account.services.OnlineStatusScheduler;
 import com.example.mc_account.utils.BeanUtils;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
@@ -29,6 +29,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Autowired
     public KafkaService kafkaServiceImpl;
+
+    @Autowired
+    private OnlineStatusScheduler onlineStatusScheduler;
 
     @Override
     public Page<Account> search(AccountSearchDto searchFilter, Pageable pageable) {
@@ -119,7 +122,7 @@ public class AccountServiceImpl implements AccountService {
             repository.save(account);
 
             // Асинхронно отключаем пользователя через 3 минуты
-            scheduleOffline(id, Duration.ofMinutes(3));
+            onlineStatusScheduler.scheduleOffline(id, Duration.ofMinutes(3));
         } else {
             account.setOnline(false);
             account.setLastOnlineTime(OffsetDateTime.now());
@@ -127,15 +130,6 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 
-    @Async("taskExecutor")
-    public void scheduleOffline(UUID id, Duration delay) {
-        try {
-            Thread.sleep(delay.toMillis());
-            isOnline(id, false);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
 
     @Override
     public List<Account> findAllByIds(List<String> ids){
