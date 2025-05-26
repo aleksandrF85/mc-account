@@ -38,7 +38,6 @@ public class KafkaConfiguration {
         config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 
         JsonSerializer<T> jsonSerializer = new JsonSerializer<>(objectMapper);
-//        jsonSerializer.setAddTypeInfo(false);
 
         return new DefaultKafkaProducerFactory<>(config, new StringSerializer(), jsonSerializer);
     }

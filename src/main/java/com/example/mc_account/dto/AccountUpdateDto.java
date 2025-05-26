@@ -2,7 +2,7 @@ package com.example.mc_account.dto;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 
 @Data
@@ -14,6 +14,6 @@ public class AccountUpdateDto {
     private String about;
     private String city;
     private String country;
-    private LocalDateTime birthDate;
+    private OffsetDateTime birthDate;
     private String emojiStatus;
 }

@@ -11,15 +11,18 @@ import com.example.mc_account.services.KafkaService;
 import com.example.mc_account.utils.BeanUtils;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
-import java.time.LocalDateTime;
+import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @Service
-//@RequiredArgsConstructor
 public class AccountServiceImpl implements AccountService {
     @Autowired
     private  AccountRepository repository;
@@ -27,11 +30,9 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     public KafkaService kafkaServiceImpl;
 
-
     @Override
-    public List<Account> search(AccountSearchDto searchFilter) {
-        return repository.findAll(
-                AccountSpecification.withFilter(searchFilter));
+    public Page<Account> search(AccountSearchDto searchFilter, Pageable pageable) {
+        return repository.findAll(AccountSpecification.withFilter(searchFilter), pageable);
     }
 
     @Override
@@ -96,7 +97,7 @@ public class AccountServiceImpl implements AccountService {
 
         Account account = findById(id);
         account.setDeleted(true);
-        account.setDeletionTimestamp(LocalDateTime.now());
+        account.setDeletionTimestamp(OffsetDateTime.now());
         repository.save(account);
     }
 
@@ -110,18 +111,30 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void isOnline(UUID id, boolean isOnline) {
-
         Account account = findById(id);
 
         if (isOnline) {
             account.setOnline(true);
-            account.setLastOnlineTime(LocalDateTime.now());
-        } else {
-            account.setLastOnlineTime(LocalDateTime.now());
-            account.setOnline(false);
-        }
+            account.setLastOnlineTime(OffsetDateTime.now());
+            repository.save(account);
 
-        repository.save(account);
+            // Асинхронно отключаем пользователя через 3 минуты
+            scheduleOffline(id, Duration.ofMinutes(3));
+        } else {
+            account.setOnline(false);
+            account.setLastOnlineTime(OffsetDateTime.now());
+            repository.save(account);
+        }
+    }
+
+    @Async("taskExecutor")
+    public void scheduleOffline(UUID id, Duration delay) {
+        try {
+            Thread.sleep(delay.toMillis());
+            isOnline(id, false);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     @Override

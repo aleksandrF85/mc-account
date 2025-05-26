@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Data
 public class AccountMeDto{
@@ -29,14 +29,14 @@ public class AccountMeDto{
     private String city;
     private String country;
     private StatusCode statusCode;
-    private LocalDateTime regDate;
-    private LocalDateTime birthDate;
+    private OffsetDateTime regDate;
+    private OffsetDateTime birthDate;
     private String messagePermission;
-    private LocalDateTime lastOnlineTime;
+    private OffsetDateTime lastOnlineTime;
     private String emojiStatus;
-    private LocalDateTime createdOn;
-    private LocalDateTime updatedOn;
-    private LocalDateTime deletionTimestamp;
+    private OffsetDateTime createdOn;
+    private OffsetDateTime updatedOn;
+    private OffsetDateTime deletionTimestamp;
     private boolean blocked;
     private boolean deleted;
     private boolean isOnline;

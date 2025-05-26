@@ -4,7 +4,7 @@ import com.example.mc_account.model.RoleType;
 import com.example.mc_account.model.StatusCode;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.Set;
 
 
@@ -23,14 +23,14 @@ public class AccountResponseDto {
     private String city;
     private String country;
     private StatusCode statusCode;
-    private LocalDateTime regDate;
-    private LocalDateTime birthDate;
+    private OffsetDateTime regDate;
+    private OffsetDateTime birthDate;
     private String messagePermission;
-    private LocalDateTime lastOnlineTime;
+    private OffsetDateTime lastOnlineTime;
     private String emojiStatus;
-    private LocalDateTime createdOn;
-    private LocalDateTime updatedOn;
-    private LocalDateTime deletionTimestamp;
+    private OffsetDateTime createdOn;
+    private OffsetDateTime updatedOn;
+    private OffsetDateTime deletionTimestamp;
     private boolean deleted;
     private boolean blocked;
     private boolean isOnline;

@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Data
 @NoArgsConstructor
@@ -19,7 +19,7 @@ public class AccountChanges {
     private String about;
     private String city;
     private String country;
-    private LocalDateTime birthDate;
+    private OffsetDateTime birthDate;
     private String emojiStatus;
 
 }

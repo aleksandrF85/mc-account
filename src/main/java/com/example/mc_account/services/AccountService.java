@@ -2,6 +2,8 @@ package com.example.mc_account.services;
 
 import com.example.mc_account.dto.filter.AccountSearchDto;
 import com.example.mc_account.model.Account;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.UUID;
@@ -9,7 +11,7 @@ import java.util.UUID;
 public interface AccountService {
 
 
-    List<Account> search(AccountSearchDto filter);
+    Page<Account> search(AccountSearchDto filter, Pageable pageable);
 
     List<Account> findAll();
 

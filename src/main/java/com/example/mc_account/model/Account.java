@@ -8,7 +8,7 @@ import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -66,16 +66,16 @@ public class Account {
     private StatusCode statusCode;
 
     @Column(name = "regDate")
-    private LocalDateTime regDate;
+    private OffsetDateTime regDate;
 
     @Column(name = "birthDate")
-    private LocalDateTime birthDate;
+    private OffsetDateTime birthDate;
 
     @Column(name = "messagePermission")
     private String messagePermission;
 
     @Column(name = "lastOnlineTime")
-    private LocalDateTime lastOnlineTime;
+    private OffsetDateTime lastOnlineTime;
 
 
     @Column(name = "emojiStatus")
@@ -83,14 +83,14 @@ public class Account {
 
     @Column(name = "createdOn")
     @CreationTimestamp
-    private LocalDateTime createdOn;
+    private OffsetDateTime createdOn;
 
     @Column(name = "updatedOn")
     @UpdateTimestamp
-    private LocalDateTime updatedOn;
+    private OffsetDateTime updatedOn;
 
     @Column(name = "deletionTimestamp")
-    private LocalDateTime deletionTimestamp;
+    private OffsetDateTime deletionTimestamp;
 
     @Column(name = "isDeleted")
     private boolean deleted;

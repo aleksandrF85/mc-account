@@ -68,19 +68,6 @@ public class KafkaServiceImpl implements KafkaService {
         log.info("Received event: {}", event.toString());
 
         Account account = accountMapper.userRegistrationToAccount(event.getUserRegistration());
-//        UserRegistration userRegistration = event.getUserRegistration();
-//
-//        account.setEmail(userRegistration.getEmail());
-//        account.setFirstName(userRegistration.getFirstName());
-//        account.setLastName(userRegistration.getLastName());
-//        account.setId(UUID.fromString(userRegistration.getUserId()));
-//        account.setPassword(userRegistration.getPassword());
-//        account.setRole(Set.of(Enum.valueOf(RoleType.class, userRegistration.getRole())));
-//        account.setRegDate(LocalDateTime.now());
-//        account.setStatusCode(StatusCode.NONE);
-//        account.setDeleted(false);
-//        account.setBlocked(false);
-//        account.setOnline(false);
 
         accountServiceImpl.create(account);
         log.info("Account created: " + account);

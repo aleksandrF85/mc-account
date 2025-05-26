@@ -19,7 +19,7 @@ import com.example.mc_account.utils.JwtTokenUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.common.protocol.types.Field;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +28,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -55,13 +59,12 @@ public class AccountController {
         Account currentUser = accountServiceImpl.findByEmail(email);
 
         accountServiceImpl.isOnline(currentUser.getId(), true);
-        //TODO Уточнить когда помечать аккаунт online (при входе?)
 
         List<String> ids = friendsWebClientService.getFriendsIds(bearerToken);
         log.info("Friends ids: [" + ids + "]");
 
-        if (!ids.isEmpty()){sendNotificationEvent(ids);}
-        //TODO отправлять сообщения о днях рождения друзей
+        if (!ids.isEmpty()){sendNotificationEvent(ids, currentUser.getId());}
+        // отправляем сообщения о днях рождения друзей
 
         return ResponseEntity.ok(
                 accountMapper.accountToMeDto(currentUser));
@@ -117,7 +120,7 @@ public class AccountController {
     @Loggable
     public ResponseEntity<Void> lastAction(@PathVariable String id) {
 
-        //TODO Прием UUID от сервиса Dialogs через Webclient
+        // Прием UUID от сервиса Dialogs через Webclient
         // о завершении сессии вебсокета у аккаунта: как
         // флаг перехода в статус offline
 
@@ -160,19 +163,23 @@ public class AccountController {
 
     @GetMapping("/search")
     @Loggable
-    public ResponseEntity<PageImpl<AccountDataDto>> searchAccounts(@RequestHeader(value = "Authorization") String bearerToken,
-                                                                   @RequestParam(required = false)  String author,
-                                                                   @RequestParam(required = false)  List<String> ids,
-                                                                   @RequestParam(required = false)  String firstName,
-                                                                   @RequestParam(required = false)  String lastName,
-                                                                   @RequestParam(required = false)  Integer ageTo,
-                                                                   @RequestParam(required = false)  Integer ageFrom,
-                                                                   @RequestParam(required = false)  String country,
-                                                                   @RequestParam(required = false)  String city,
-                                                                   @RequestParam(required = false)  String statusCode,
-                                                                   @RequestParam(required = false)  boolean isDelete,
-                                                                   @RequestParam(required = false, defaultValue = "0") String page,
-                                                                   @RequestParam(required = false, defaultValue = "5") String size) {
+    public ResponseEntity<Page<AccountDataDto>> searchAccounts(
+            @RequestHeader(value = "Authorization") String bearerToken,
+            @RequestParam(required = false)  String author,
+            @RequestParam(required = false)  List<String> ids,
+            @RequestParam(required = false)  String firstName,
+            @RequestParam(required = false)  String lastName,
+            @RequestParam(required = false)  Integer ageTo,
+            @RequestParam(required = false)  Integer ageFrom,
+            @RequestParam(required = false)  String country,
+            @RequestParam(required = false)  String city,
+            @RequestParam(required = false)  String statusCode,
+            @RequestParam(required = false)  Boolean isDelete,
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "5") int size) {
+
+        String email = JwtTokenUtils.parseJwtToken(bearerToken).get("sub").toString();
+        UUID currentUserId = accountServiceImpl.findByEmail(email).getId();
 
         AccountSearchDto request = new AccountSearchDto();
         DtoUtils.setIfNotNull(author, request::setAuthor);
@@ -183,56 +190,75 @@ public class AccountController {
         DtoUtils.setIfNotNull(ageFrom, request::setAgeFrom);
         DtoUtils.setIfNotNull(country, request::setCountry);
         DtoUtils.setIfNotNull(city, request::setCity);
-        request.setDeleted(isDelete);
+        request.setDeleted(Boolean.TRUE.equals(isDelete));
 
-        String email = JwtTokenUtils.parseJwtToken(bearerToken).get("sub").toString();
-        UUID currentUserId = accountServiceImpl.findByEmail(email).getId();
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Account> accountPage = accountServiceImpl.search(request, pageable);
 
-        List<Account> accountList = accountServiceImpl.search(request).stream()
+        List<Account> filteredAccounts = accountPage.getContent().stream()
                 .filter(account -> !account.getId().equals(currentUserId))
                 .collect(Collectors.toList());
 
         if (statusCode != null && !statusCode.isEmpty()) {
+            StatusCode sc = StatusCode.valueOf(statusCode);
+
             Set<UUID> allowedIds = friendsWebClientService.getIdsByStatusCode(bearerToken, statusCode).stream()
                     .map(UUID::fromString)
                     .collect(Collectors.toSet());
 
-            accountList = accountList.stream()
+            filteredAccounts = filteredAccounts.stream()
                     .filter(account -> allowedIds.contains(account.getId()))
-                    .peek(account -> account.setStatusCode(Enum.valueOf(StatusCode.class, statusCode)))
+                    .peek(account -> account.setStatusCode(sc))
                     .collect(Collectors.toList());
         }
 
-        List<AccountDataDto> accountDataDtoList = accountList.stream()
+        List<AccountDataDto> dtoList = filteredAccounts.stream()
                 .map(accountMapper::accountToDataDto)
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(listToPage(accountDataDtoList, page, size));
+        Page<AccountDataDto> resultPage = new PageImpl<>(
+                dtoList,
+                pageable,
+                accountPage.getTotalElements()
+        );
+
+        return ResponseEntity.ok(resultPage);
     }
 
     @GetMapping("/search/statusCode")
     @Loggable
-    public ResponseEntity<PageImpl<AccountDataDto>> searchByStatusCode(@RequestHeader(value = "Authorization") String bearerToken,
-                                                                       @RequestParam(required = false)  String statusCode,
-                                                                       @RequestParam(required = false, defaultValue = "0") String page,
-                                                                       @RequestParam(required = false, defaultValue = "5")  String size) {
+    public ResponseEntity<Page<AccountDataDto>> searchByStatusCode(
+            @RequestHeader(value = "Authorization") String bearerToken,
+            @RequestParam(required = false) String statusCode,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
 
-        //TODO Уточнить параметры поиска и ответ
-
-        AccountSearchDto request = new AccountSearchDto();
-
-        request.setIds(friendsWebClientService.getIdsByStatusCode(bearerToken, statusCode));
-        request.setDeleted(false);
-
-        List<AccountDataDto> accountDataDtoList = new ArrayList<>();
-
-        if (!request.getIds().isEmpty()) {
-            accountDataDtoList = accountServiceImpl.search(request).stream()
-                    .map(accountMapper::accountToDataDto)
-                    .peek(accountDataDto -> accountDataDto.setStatusCode(Enum.valueOf(StatusCode.class, statusCode)))
-                    .collect(Collectors.toList());
+        if (statusCode == null || statusCode.isEmpty()) {
+            return ResponseEntity.badRequest().body(Page.empty());
         }
-        return ResponseEntity.ok(listToPage(accountDataDtoList, page, size));
+
+        StatusCode sc = StatusCode.valueOf(statusCode);
+
+        List<String> friendIds = friendsWebClientService.getIdsByStatusCode(bearerToken, statusCode);
+        if (friendIds.isEmpty()) {
+            return ResponseEntity.ok(Page.empty());
+        }
+
+        AccountSearchDto searchDto = new AccountSearchDto();
+        searchDto.setIds(friendIds);
+        searchDto.setDeleted(false);
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Account> accountsPage = accountServiceImpl.search(searchDto, pageable);
+
+        List<AccountDataDto> dtoList = accountsPage.getContent().stream()
+                .map(accountMapper::accountToDataDto)
+                .peek(dto -> dto.setStatusCode(sc))
+                .collect(Collectors.toList());
+
+        Page<AccountDataDto> resultPage = new PageImpl<>(dtoList, pageable, accountsPage.getTotalElements());
+
+        return ResponseEntity.ok(resultPage);
     }
 
     private void sendAccountChangesEvent(AccountUpdateDto request, String id) {
@@ -255,31 +281,31 @@ public class AccountController {
         kafkaServiceImpl.sendUserRegistrationEvent(event);
     }
 
-    public void sendNotificationEvent (List<String> ids){
+    public void sendNotificationEvent(List<String> ids, UUID userId) {
+        OffsetDateTime now = OffsetDateTime.now();
 
-        for (Account account: accountServiceImpl.findAllByIds(ids)) {
-            if (account.getBirthDate().getDayOfYear() == LocalDateTime.now().getDayOfYear()){
+        List<Account> accounts = accountServiceImpl.findAllByIds(ids);
+
+        for (Account account : accounts) {
+            if (account.getBirthDate() != null && isTodayBirthday(account.getBirthDate(), now)) {
 
                 NotificationEvent event = new NotificationEvent();
                 event.setEventId(UUID.randomUUID());
-                event.setId(account.getId()); //TODO уточнить поле
+                event.setId(account.getId());
+                event.setReceiverId(userId);
                 event.setNotificationType(NotificationType.FRIEND_BIRTHDAY);
                 event.setServiceName(MicroServiceName.MC_ACCOUNT);
-                event.setSentTime(LocalDateTime.now());
-                event.setContent("у пользователя " + account.getFirstName() + " " + account.getLastName() + " сегодня день рождения!");
+                event.setSentTime(now);
+                event.setContent(String.format("У пользователя %s %s сегодня день рождения!",
+                        account.getFirstName(), account.getLastName()));
 
                 kafkaServiceImpl.sendNotificationEvent(event);
             }
         }
     }
 
-    private <T>  PageImpl<T> listToPage (List<T> list, String page, String size){
-
-        Pageable pageRequest = PageRequest.of(Integer.parseInt(page), Integer.parseInt(size));
-        int start = (int) pageRequest.getOffset();
-        int end = Math.min((start + pageRequest.getPageSize()), list.size());
-
-        List<T> pageContent = list.subList(start, end);
-        return new PageImpl<>(pageContent, pageRequest, list.size());
+    private boolean isTodayBirthday(OffsetDateTime birthDate, OffsetDateTime now) {
+        return birthDate.getMonth() == now.getMonth()
+                && birthDate.getDayOfMonth() == now.getDayOfMonth();
     }
 }

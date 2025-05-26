@@ -3,7 +3,7 @@ package com.example.mc_account.dto;
 import com.example.mc_account.model.StatusCode;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Data
 public class AccountDataDto {
@@ -17,9 +17,9 @@ public class AccountDataDto {
     private String city;
     private String country;
     private StatusCode statusCode;
-    private LocalDateTime birthDate;
+    private OffsetDateTime birthDate;
     private String messagePermission;
-    private LocalDateTime lastOnlineTime;
+    private OffsetDateTime lastOnlineTime;
     private String emojiStatus;
     private boolean deleted;
     private boolean blocked;
