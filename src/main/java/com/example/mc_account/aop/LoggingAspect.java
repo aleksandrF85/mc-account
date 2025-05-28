@@ -22,15 +22,17 @@ import java.util.Map;
 @Slf4j
 public class LoggingAspect {
 
-    /** Вы можете реализовать аспект, который будет выполняться перед методом, помеченным вашей аннотацией.
+    /**
+     * Вы можете реализовать аспект, который будет выполняться перед методом, помеченным вашей аннотацией.
      * Например, @Before("@annotation(myAnnotation)") означает, что этот аспект будет выполняться перед методом, который помечен аннотацией myAnnotation.
-     Вы можете получить HttpServletRequest за пределами контроллера, используя контекст:
-     RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-     HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
-     С помощью этого объекта вы можете извлечь переменные пути запроса:
-     var pathVariables = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-     Также вы можете извлечь и GET-параметры запроса:
-     request.getParameter(“paramName”) **/
+     * Вы можете получить HttpServletRequest за пределами контроллера, используя контекст:
+     * RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+     * HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
+     * С помощью этого объекта вы можете извлечь переменные пути запроса:
+     * var pathVariables = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+     * Также вы можете извлечь и GET-параметры запроса:
+     * request.getParameter(“paramName”)
+     **/
 
 
     @Before("@annotation(Loggable)")
@@ -47,7 +49,7 @@ public class LoggingAspect {
         log.info("Request URI: " + request.getRequestURI());
         log.info("Header: " + request.getHeader("Authorization"));
 
-        if (!pathVariables.isEmpty()){
+        if (!pathVariables.isEmpty()) {
             log.info("Path Variables:");
             for (String name : pathVariables.keySet()) {
                 String key = name;
@@ -56,7 +58,7 @@ public class LoggingAspect {
             }
         }
 
-        if (!parameterMap.isEmpty()){
+        if (!parameterMap.isEmpty()) {
             log.info("Parameter Map:");
             for (String name : parameterMap.keySet()) {
                 String key = name;
@@ -69,12 +71,12 @@ public class LoggingAspect {
     }
 
     @After("@annotation(Loggable)")
-    public void logAfter(JoinPoint joinPoint){
+    public void logAfter(JoinPoint joinPoint) {
         log.info("After execution of {}", joinPoint.getSignature().getName());
     }
 
     @AfterReturning("@annotation(Loggable)")
-    public void logAfterReturning(JoinPoint joinPoint, Object result){
+    public void logAfterReturning(JoinPoint joinPoint, Object result) {
         log.info("After returning from {}, with result {}", joinPoint.getSignature().getName(), result);
     }
 }

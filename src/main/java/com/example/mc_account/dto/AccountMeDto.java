@@ -8,7 +8,7 @@ import lombok.Data;
 import java.time.OffsetDateTime;
 
 @Data
-public class AccountMeDto{
+public class AccountMeDto {
 
     private String id; //TODO получать данные при авторизации
     @NotBlank(message = "Имя должно быть указано")

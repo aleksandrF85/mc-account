@@ -28,6 +28,11 @@ class AccountServiceImplIntegrationTest {
             .withDatabaseName("testdb")
             .withUsername("test")
             .withPassword("test");
+    @Autowired
+    private AccountService accountService;
+    @Autowired
+    private AccountRepository accountRepository;
+    private Account testAccount;
 
     @DynamicPropertySource
     static void properties(DynamicPropertyRegistry registry) {
@@ -35,14 +40,6 @@ class AccountServiceImplIntegrationTest {
         registry.add("spring.datasource.username", postgresContainer::getUsername);
         registry.add("spring.datasource.password", postgresContainer::getPassword);
     }
-
-    @Autowired
-    private AccountService accountService;
-
-    @Autowired
-    private AccountRepository accountRepository;
-
-    private Account testAccount;
 
     @BeforeEach
     void init() {

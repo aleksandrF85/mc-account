@@ -5,8 +5,8 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQL94Dialect
     properties:
       hibernate:
-#        hbm2ddl:
-#          auto: validate
+        #        hbm2ddl:
+        #          auto: validate
         dialect: org.hibernate.dialect.PostgreSQLDialect
         transaction:
           jta:

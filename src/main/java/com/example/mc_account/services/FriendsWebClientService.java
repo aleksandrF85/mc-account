@@ -18,7 +18,6 @@ public class FriendsWebClientService {
     private final WebClient.Builder webClientBuilder;
 
 
-
     public List<String> getFriendsIds(String bearerToken) {
         return webClientBuilder.build()
                 .get()
@@ -37,7 +36,8 @@ public class FriendsWebClientService {
                 )
 
                 // Преобразуем тело в List<String>
-                .bodyToMono(new ParameterizedTypeReference<List<String>>() {})
+                .bodyToMono(new ParameterizedTypeReference<List<String>>() {
+                })
 
                 // Ошибка при недоступности сервиса (например, DNS, таймаут)
                 .onErrorResume(WebClientRequestException.class, ex -> {
@@ -54,6 +54,7 @@ public class FriendsWebClientService {
                 // Блокируем для получения результата (если нужен синхронный вызов)
                 .block();
     }
+
     public List<String> getIdsByStatusCode(String bearerToken, String statusCode) {
         return webClientBuilder.build()
                 .get()
@@ -72,7 +73,8 @@ public class FriendsWebClientService {
                 )
 
                 // Преобразуем тело в List<String>
-                .bodyToMono(new ParameterizedTypeReference<List<String>>() {})
+                .bodyToMono(new ParameterizedTypeReference<List<String>>() {
+                })
 
                 // Ошибка при недоступности сервиса (например, DNS, таймаут)
                 .onErrorResume(WebClientRequestException.class, ex -> {

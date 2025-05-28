@@ -18,7 +18,6 @@ import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
-//@RequiredArgsConstructor
 public class KafkaServiceImpl implements KafkaService {
 
     @Value("${app.kafka.accountChanges}")
@@ -46,7 +45,7 @@ public class KafkaServiceImpl implements KafkaService {
 
         log.info("Sent event {}", event);
 
-   }
+    }
 
     @Override
     public void sendNotificationEvent(NotificationEvent event) {

@@ -25,11 +25,9 @@ import java.util.UUID;
 @Service
 public class AccountServiceImpl implements AccountService {
     @Autowired
-    private  AccountRepository repository;
-
-    @Autowired
     public KafkaService kafkaServiceImpl;
-
+    @Autowired
+    private AccountRepository repository;
     @Autowired
     private OnlineStatusScheduler onlineStatusScheduler;
 
@@ -45,7 +43,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account findByEmail(String email) {
-         Account account = repository.findByEmail(email)
+        Account account = repository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException(MessageFormat.format(
                         "Пользователь с таким email {0} не найден!", email
                 )));
@@ -115,24 +113,20 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public void isOnline(UUID id, boolean isOnline) {
         Account account = findById(id);
+        OffsetDateTime now = OffsetDateTime.now();
+
+        account.setLastOnlineTime(now);
+        account.setOnline(isOnline);
+        repository.save(account);
 
         if (isOnline) {
-            account.setOnline(true);
-            account.setLastOnlineTime(OffsetDateTime.now());
-            repository.save(account);
-
-            // Асинхронно отключаем пользователя через 3 минуты
+            // Асинхронное отключение пользователя через 3 минуты
             onlineStatusScheduler.scheduleOffline(id, Duration.ofMinutes(3));
-        } else {
-            account.setOnline(false);
-            account.setLastOnlineTime(OffsetDateTime.now());
-            repository.save(account);
         }
     }
 
-
     @Override
-    public List<Account> findAllByIds(List<String> ids){
+    public List<Account> findAllByIds(List<String> ids) {
 
         List<UUID> uuidList = ids.stream().map(UUID::fromString).toList();
 

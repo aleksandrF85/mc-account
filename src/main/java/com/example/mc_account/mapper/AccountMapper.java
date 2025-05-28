@@ -27,7 +27,7 @@ public interface AccountMapper {
 
     @Mapping(target = "id", expression = "java(UUID.fromString(registration.getUserId()))")
     @Mapping(target = "role", expression = "java(Set.of(RoleType.valueOf(registration.getRole())))")
-    @Mapping(target = "regDate", expression = "java(java.time.OffsetDateTime.now())")
+    @Mapping(target = "regDate", expression = "java(java.time.OffsetDateTime.now(ZoneOffset.UTC))")
     @Mapping(target = "statusCode", constant = "NONE")
     @Mapping(target = "deleted", constant = "false")
     @Mapping(target = "blocked", constant = "false")

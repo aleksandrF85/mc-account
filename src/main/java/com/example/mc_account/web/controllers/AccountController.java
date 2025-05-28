@@ -27,7 +27,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
@@ -63,7 +62,9 @@ public class AccountController {
         List<String> ids = friendsWebClientService.getFriendsIds(bearerToken);
         log.info("Friends ids: [" + ids + "]");
 
-        if (!ids.isEmpty()){sendNotificationEvent(ids, currentUser.getId());}
+        if (!ids.isEmpty()) {
+            sendNotificationEvent(ids, currentUser.getId());
+        }
         // отправляем сообщения о днях рождения друзей
 
         return ResponseEntity.ok(
@@ -165,16 +166,16 @@ public class AccountController {
     @Loggable
     public ResponseEntity<Page<AccountDataDto>> searchAccounts(
             @RequestHeader(value = "Authorization") String bearerToken,
-            @RequestParam(required = false)  String author,
-            @RequestParam(required = false)  List<String> ids,
-            @RequestParam(required = false)  String firstName,
-            @RequestParam(required = false)  String lastName,
-            @RequestParam(required = false)  Integer ageTo,
-            @RequestParam(required = false)  Integer ageFrom,
-            @RequestParam(required = false)  String country,
-            @RequestParam(required = false)  String city,
-            @RequestParam(required = false)  String statusCode,
-            @RequestParam(required = false)  Boolean isDelete,
+            @RequestParam(required = false) String author,
+            @RequestParam(required = false) List<String> ids,
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName,
+            @RequestParam(required = false) Integer ageTo,
+            @RequestParam(required = false) Integer ageFrom,
+            @RequestParam(required = false) String country,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String statusCode,
+            @RequestParam(required = false) Boolean isDelete,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "5") int size) {
 
@@ -274,7 +275,7 @@ public class AccountController {
                 request.getAbout(),
                 request.getCity(),
                 request.getCountry(),
-                request.getBirthDate(),
+                request.getBirthDate().toLocalDateTime(),
                 request.getEmojiStatus()
         ));
 
@@ -295,7 +296,7 @@ public class AccountController {
                 event.setReceiverId(userId);
                 event.setNotificationType(NotificationType.FRIEND_BIRTHDAY);
                 event.setServiceName(MicroServiceName.MC_ACCOUNT);
-                event.setSentTime(now);
+                event.setSentTime(now.toLocalDateTime());
                 event.setContent(String.format("У пользователя %s %s сегодня день рождения!",
                         account.getFirstName(), account.getLastName()));
 
