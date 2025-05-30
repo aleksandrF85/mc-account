@@ -24,16 +24,12 @@ public interface AccountSpecification {
     }
 
     static Specification<Account> byAccountIds(List<String> ids) {
-
-        return ((root, query, criteriaBuilder) -> {
-            if (ids == null || ids.isEmpty()) {
-                return null;
-            }
-
+        return (root, query, cb) -> {
+            if (ids == null) return null; // игнорируем фильтрацию по id, если не передан параметр
+            if (ids.isEmpty()) return cb.disjunction(); // => WHERE false (возвращает пустой результат)
             List<UUID> uuidList = ids.stream().map(UUID::fromString).toList();
-
             return root.get("id").in(uuidList);
-        });
+        };
     }
 
     static Specification<Account> byAuthor(String author) {
