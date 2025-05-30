@@ -17,7 +17,6 @@ public class BeanUtils {
         for (Field field : fields) {
             field.setAccessible(true);
             Object value = field.get(source);
-            // TODO проверить логику копирования полей boolean
             if (value != null &&
                     !value.toString().isEmpty() &&
                     !value.equals(List.of()) &&

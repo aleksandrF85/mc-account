@@ -10,7 +10,7 @@ import java.time.OffsetDateTime;
 @Data
 public class AccountMeDto {
 
-    private String id; //TODO получать данные при авторизации
+    private String id;
     @NotBlank(message = "Имя должно быть указано")
     @Size(min = 3, max = 20, message = "Имя не должно быть меньше {min} и больше {max} символов!")
     private String firstName;

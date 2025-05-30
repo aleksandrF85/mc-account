@@ -26,7 +26,7 @@ public class AccountEventHandlerService {
     public void handleResetPasswordEvent(ResetPasswordEvent event) {
         ResetPassword resetPassword = event.getResetPassword();
         Account account = accountService.findByEmail(resetPassword.getEmail());
-        account.setPassword(resetPassword.getToken()); // TODO: уточнить источник пароля
+        account.setPassword(resetPassword.getToken()); // уточнить источник пароля
         accountService.update(account, account.getId());
         log.info("Account updated: " + account);
     }
