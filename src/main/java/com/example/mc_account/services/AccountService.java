@@ -33,20 +33,6 @@ public interface AccountService {
 
     List<Account> findAllByIds(List<String> ids);
 
-    Page<Account> searchFilteredAccounts(
-            AccountSearchDto dto,
-            UUID currentUserId,
-            String statusCode,
-            List<String> friendIds,
-            Pageable pageable
-    );
-
-    Page<Account> searchFriendsByStatusCode(
-            List<String> friendIds,
-            String statusCode,
-            Pageable pageable
-    );
-
     int getTotalActiveAccounts();
 
 }

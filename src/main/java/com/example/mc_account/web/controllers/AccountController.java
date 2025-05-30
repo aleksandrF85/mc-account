@@ -9,6 +9,7 @@ import com.example.mc_account.dto.AccountUpdateDto;
 import com.example.mc_account.dto.filter.AccountSearchDto;
 import com.example.mc_account.mapper.AccountMapper;
 import com.example.mc_account.model.Account;
+import com.example.mc_account.model.StatusCode;
 import com.example.mc_account.services.*;
 import com.example.mc_account.utils.DtoUtils;
 import com.example.mc_account.utils.JwtTokenUtils;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -161,7 +163,6 @@ public class AccountController {
             @RequestParam(required = false) Integer ageFrom,
             @RequestParam(required = false) String country,
             @RequestParam(required = false) String city,
-            @RequestParam(required = false) String statusCode,
             @RequestParam(required = false) Boolean isDelete,
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "5") int size) {
@@ -180,13 +181,12 @@ public class AccountController {
         request.setDeleted(Boolean.TRUE.equals(isDelete));
 
         Pageable pageable = PageRequest.of(page, size);
-        List<String> friendIds = null;
-        if (statusCode != null && !statusCode.isEmpty()) {
-            friendIds = friendsWebClientService.getIdsByStatusCode(bearerToken, statusCode);
-        }
 
-        Page<Account> filtered = accountServiceImpl.searchFilteredAccounts(request, currentUserId, statusCode, friendIds, pageable);
-        List<AccountDataDto> dtos = filtered.getContent().stream().map(accountMapper::accountToDataDto).toList();
+        Page<Account> filtered = accountServiceImpl.search(request, pageable);
+        List<AccountDataDto> dtos = filtered.getContent().stream()
+                .filter(account -> !account.getId().equals(currentUserId))
+                .map(accountMapper::accountToDataDto)
+                .collect(Collectors.toList());
 
         return ResponseEntity.ok(new PageImpl<>(dtos, pageable, filtered.getTotalElements()));
     }
@@ -196,6 +196,7 @@ public class AccountController {
     public ResponseEntity<Page<AccountDataDto>> searchByStatusCode(
             @RequestHeader(value = "Authorization") String bearerToken,
             @RequestParam(required = false) String statusCode,
+            @RequestParam(required = false) String firstName,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
 
@@ -203,11 +204,21 @@ public class AccountController {
             return ResponseEntity.badRequest().body(Page.empty());
         }
 
-        List<String> friendIds = friendsWebClientService.getIdsByStatusCode(bearerToken, statusCode);
         Pageable pageable = PageRequest.of(page, size);
+        StatusCode sc = StatusCode.valueOf(statusCode);
 
-        Page<Account> filtered = accountServiceImpl.searchFriendsByStatusCode(friendIds, statusCode, pageable);
-        List<AccountDataDto> dtos = filtered.getContent().stream().map(accountMapper::accountToDataDto).toList();
+        List<String> friendIds = friendsWebClientService.getIdsByStatusCode(bearerToken, statusCode);
+
+        AccountSearchDto request = new AccountSearchDto();
+        DtoUtils.setIfNotNull(firstName, request::setFirstName);
+        request.setIds(friendIds);
+        request.setDeleted(false);
+
+        Page<Account> filtered = accountServiceImpl.search(request, pageable);
+        List<AccountDataDto> dtos = filtered.getContent().stream()
+                .map(accountMapper::accountToDataDto)
+                .peek(account -> account.setStatusCode(sc))
+                .toList();
 
         return ResponseEntity.ok(new PageImpl<>(dtos, pageable, filtered.getTotalElements()));
     }

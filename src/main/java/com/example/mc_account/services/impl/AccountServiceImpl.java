@@ -4,7 +4,6 @@ package com.example.mc_account.services.impl;
 import com.example.mc_account.dto.filter.AccountSearchDto;
 import com.example.mc_account.exception.AlreadyExistException;
 import com.example.mc_account.model.Account;
-import com.example.mc_account.model.StatusCode;
 import com.example.mc_account.reposirory.AccountRepository;
 import com.example.mc_account.reposirory.AccountSpecification;
 import com.example.mc_account.services.AccountService;
@@ -14,7 +13,6 @@ import com.example.mc_account.utils.BeanUtils;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -22,14 +20,10 @@ import java.text.MessageFormat;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class AccountServiceImpl implements AccountService {
-    @Autowired
-    public KafkaProducerService kafkaServiceImpl;
     @Autowired
     private AccountRepository repository;
     @Autowired
@@ -136,61 +130,6 @@ public class AccountServiceImpl implements AccountService {
 
         return repository.findAllById(uuidList);
     }
-
-    @Override
-    public Page<Account> searchFilteredAccounts(
-            AccountSearchDto dto,
-            UUID currentUserId,
-            String statusCode,
-            List<String> friendIds,
-            Pageable pageable
-    ) {
-        Page<Account> accountPage = search(dto, pageable);
-
-        List<Account> filtered = accountPage.getContent().stream()
-                .filter(account -> !account.getId().equals(currentUserId))
-                .collect(Collectors.toList());
-
-        if (statusCode != null && !statusCode.isEmpty() && friendIds != null) {
-            Set<UUID> allowedIds = friendIds.stream()
-                    .map(UUID::fromString)
-                    .collect(Collectors.toSet());
-
-            StatusCode sc = StatusCode.valueOf(statusCode);
-
-            filtered = filtered.stream()
-                    .filter(account -> allowedIds.contains(account.getId()))
-                    .peek(account -> account.setStatusCode(sc))
-                    .collect(Collectors.toList());
-        }
-
-        return new PageImpl<>(filtered, pageable, accountPage.getTotalElements());
-    }
-
-    @Override
-    public Page<Account> searchFriendsByStatusCode(
-            List<String> friendIds,
-            String statusCode,
-            Pageable pageable
-    ) {
-        if (friendIds == null || friendIds.isEmpty()) {
-            return Page.empty();
-        }
-
-        AccountSearchDto searchDto = new AccountSearchDto();
-        searchDto.setIds(friendIds);
-        searchDto.setDeleted(false);
-
-        Page<Account> accountsPage = search(searchDto, pageable);
-
-        if (statusCode != null && !statusCode.isEmpty()) {
-            StatusCode sc = StatusCode.valueOf(statusCode);
-            accountsPage.getContent().forEach(acc -> acc.setStatusCode(sc));
-        }
-
-        return accountsPage;
-    }
-
 
     @Override
     public int getTotalActiveAccounts() {
