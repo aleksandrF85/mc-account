@@ -9,19 +9,15 @@ import com.example.mc_account.model.StatusCode;
 import com.example.mc_account.services.AccountService;
 import com.example.mc_account.services.FriendsWebClientService;
 import com.example.mc_account.utils.DtoUtils;
-import com.example.mc_account.utils.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
