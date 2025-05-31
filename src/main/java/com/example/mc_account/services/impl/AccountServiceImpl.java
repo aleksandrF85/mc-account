@@ -7,7 +7,6 @@ import com.example.mc_account.model.Account;
 import com.example.mc_account.reposirory.AccountRepository;
 import com.example.mc_account.reposirory.AccountSpecification;
 import com.example.mc_account.services.AccountService;
-import com.example.mc_account.services.KafkaProducerService;
 import com.example.mc_account.services.OnlineStatusScheduler;
 import com.example.mc_account.utils.BeanUtils;
 import jakarta.persistence.EntityNotFoundException;

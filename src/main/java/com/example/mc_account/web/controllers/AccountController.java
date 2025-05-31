@@ -179,16 +179,14 @@ public class AccountController {
         DtoUtils.setIfNotNull(country, request::setCountry);
         DtoUtils.setIfNotNull(city, request::setCity);
         request.setDeleted(Boolean.TRUE.equals(isDelete));
+        request.setCurrentUserId(currentUserId);
 
         Pageable pageable = PageRequest.of(page, size);
 
         Page<Account> filtered = accountServiceImpl.search(request, pageable);
-        List<AccountDataDto> dtos = filtered.getContent().stream()
-                .filter(account -> !account.getId().equals(currentUserId))
-                .map(accountMapper::accountToDataDto)
-                .collect(Collectors.toList());
+        Page<AccountDataDto> dtoPage = filtered.map(accountMapper::accountToDataDto);
 
-        return ResponseEntity.ok(new PageImpl<>(dtos, pageable, filtered.getTotalElements()));
+        return ResponseEntity.ok(dtoPage);
     }
 
     @GetMapping("/search/statusCode")
@@ -215,12 +213,14 @@ public class AccountController {
         request.setDeleted(false);
 
         Page<Account> filtered = accountServiceImpl.search(request, pageable);
-        List<AccountDataDto> dtos = filtered.getContent().stream()
-                .map(accountMapper::accountToDataDto)
-                .peek(account -> account.setStatusCode(sc))
-                .toList();
+        Page<AccountDataDto> dtoPage = filtered
+                .map(account -> {
+                    AccountDataDto dto = accountMapper.accountToDataDto(account);
+                    dto.setStatusCode(sc);
+                    return dto;
+                });
 
-        return ResponseEntity.ok(new PageImpl<>(dtos, pageable, filtered.getTotalElements()));
+        return ResponseEntity.ok(dtoPage);
     }
 
     private void notifyFriendBirthdays(List<String> friendIds, UUID currentUserId) {

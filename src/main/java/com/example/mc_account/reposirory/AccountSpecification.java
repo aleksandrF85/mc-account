@@ -20,7 +20,16 @@ public interface AccountSpecification {
                 .and(byCity(accountFilter.getCity()))
                 .and(byCountry(accountFilter.getCountry()))
                 .and(isDeleted(accountFilter.isDeleted()))
-                .and(byAge(accountFilter.getAgeFrom(), accountFilter.getAgeTo()));
+                .and(byAge(accountFilter.getAgeFrom(), accountFilter.getAgeTo()))
+                .and(notCurrentUser(accountFilter.getCurrentUserId()));
+    }
+
+    static Specification<Account> notCurrentUser(UUID id) {
+        return (root, query, cb) -> {
+            if (id == null) return null; // игнорируем фильтрацию по id, если не передан параметр
+
+            return cb.notEqual(root.get("id"), id);
+        };
     }
 
     static Specification<Account> byAccountIds(List<String> ids) {
