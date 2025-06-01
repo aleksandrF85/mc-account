@@ -35,8 +35,11 @@ public class LoggingAspect {
      **/
 
 
+    private ThreadLocal<Long> startTime = new ThreadLocal<>();
+
     @Before("@annotation(Loggable)")
     public void logBefore(JoinPoint joinPoint) {
+        startTime.set(System.currentTimeMillis());  // запоминаем старт времени
 
         log.info("Before execution of {}", joinPoint.getSignature().getName());
 
@@ -66,8 +69,6 @@ public class LoggingAspect {
                 log.info("\t" + key + " " + value);
             }
         }
-
-
     }
 
     @After("@annotation(Loggable)")
@@ -75,8 +76,11 @@ public class LoggingAspect {
         log.info("After execution of {}", joinPoint.getSignature().getName());
     }
 
-    @AfterReturning("@annotation(Loggable)")
+    @AfterReturning(value = "@annotation(Loggable)", returning = "result")
     public void logAfterReturning(JoinPoint joinPoint, Object result) {
-        log.info("After returning from {}, with result {}", joinPoint.getSignature().getName(), result);
+        long duration = System.currentTimeMillis() - startTime.get();  // считаем время выполнения
+        log.info("After returning from {}, with result {}. Execution time: {} ms", joinPoint.getSignature().getName(), result, duration);
+
+        startTime.remove(); // очищаем ThreadLocal, чтобы избежать утечек памяти
     }
 }
