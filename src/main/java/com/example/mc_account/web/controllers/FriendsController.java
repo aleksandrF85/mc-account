@@ -3,6 +3,7 @@ package com.example.mc_account.web.controllers;
 import com.example.mc_account.aop.Loggable;
 import com.example.mc_account.dto.AccountDataDto;
 import com.example.mc_account.dto.filter.AccountSearchDto;
+import com.example.mc_account.dto.response.PagedResponse;
 import com.example.mc_account.mapper.AccountMapper;
 import com.example.mc_account.model.Account;
 import com.example.mc_account.model.StatusCode;
@@ -34,7 +35,7 @@ public class FriendsController {
 
     @GetMapping
     @Loggable
-    public ResponseEntity<Page<AccountDataDto>> getFriends(
+    public ResponseEntity<PagedResponse<AccountDataDto>> getFriends(
             @RequestHeader(value = "Authorization") String bearerToken,
             @RequestParam(required = false) String statusCode,
             @RequestParam(required = false) String firstName,
@@ -45,8 +46,11 @@ public class FriendsController {
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "5") int size) {
 
+        if (statusCode == null || statusCode.isEmpty()) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
         AccountSearchDto request = new AccountSearchDto();
-//        DtoUtils.setIfNotNull(firstName, request::setAuthor);
         DtoUtils.setIfNotNull(firstName, request::setFirstName);
         DtoUtils.setIfNotNull(ageTo, request::setAgeTo);
         DtoUtils.setIfNotNull(ageFrom, request::setAgeFrom);
@@ -55,35 +59,29 @@ public class FriendsController {
         request.setDeleted(false);
 
         Pageable pageable = PageRequest.of(page, size);
-
-        if (statusCode == null || statusCode.isEmpty()) {
-            return ResponseEntity.badRequest().body(Page.empty(pageable));
-        }
-
-        StatusCode sc;
-        try {
-            sc = StatusCode.valueOf(statusCode);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Page.empty(pageable));
-        }
+        StatusCode sc = StatusCode.valueOf(statusCode);
 
         List<String> friendIds = friendsWebClientService.getIdsByStatusCode(bearerToken, statusCode);
-        log.info("Found friend IDs: {}", friendIds);
-
-        if (friendIds == null || friendIds.isEmpty()) {
-            return ResponseEntity.ok(Page.empty(pageable));
-        }
-
         request.setIds(friendIds);
+
         Page<Account> filtered = accountServiceImpl.search(request, pageable);
 
-        Page<AccountDataDto> dtoPage = filtered.map(account -> {
-            AccountDataDto dto = accountMapper.accountToDataDto(account);
-            dto.setStatusCode(sc);
-            return dto;
-        });
+        List<AccountDataDto> content = filtered.stream()
+                .map(account -> {
+                    AccountDataDto dto = accountMapper.accountToDataDto(account);
+                    dto.setStatusCode(sc);
+                    return dto;
+                })
+                .toList();
 
-        return ResponseEntity.ok(dtoPage);
+        PagedResponse<AccountDataDto> response = new PagedResponse<>();
+        response.setContent(content);
+        response.setTotalPages(filtered.getTotalPages());
+        response.setTotalElements(filtered.getTotalElements());
+        response.setPageNumber(filtered.getNumber());
+        response.setPageSize(filtered.getSize());
+
+        return ResponseEntity.ok(response);
     }
 
 }
