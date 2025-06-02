@@ -39,13 +39,14 @@ public class AccountController {
 
     public final AccountService accountServiceImpl;
 
-    public final KafkaProducerService kafkaProducerService;
-
     private final FriendsWebClientService friendsWebClientService;
 
     private final KafkaProducerService eventProducerService;
 
     private final AccountEventFactoryService eventFactoryService;
+
+    private final NotificationAsyncService notificationAsyncService;
+
 
     @GetMapping("/me")
     @Loggable
@@ -58,7 +59,7 @@ public class AccountController {
 
         List<String> friendIds = friendsWebClientService.getFriendsIds(bearerToken);
         if (!friendIds.isEmpty()) {
-            notifyFriendBirthdays(friendIds, account.getId());
+            notificationAsyncService.notifyFriendBirthdaysAsync(friendIds, account.getId());
         }
 
         return ResponseEntity.ok(
@@ -221,19 +222,6 @@ public class AccountController {
                 });
 
         return ResponseEntity.ok(dtoPage);
-    }
-
-    private void notifyFriendBirthdays(List<String> friendIds, UUID currentUserId) {
-        List<Account> friends = accountServiceImpl.findAllByIds(friendIds);
-        OffsetDateTime now = OffsetDateTime.now();
-
-        friends.stream()
-                .filter(acc -> acc.getBirthDate() != null && isTodayBirthday(acc.getBirthDate(), now))
-                .forEach(acc -> eventProducerService.sendNotificationEvent(eventFactoryService.createBirthdayNotificationEvent(acc, currentUserId)));
-    }
-
-    private boolean isTodayBirthday(OffsetDateTime birthDate, OffsetDateTime now) {
-        return birthDate.getMonth() == now.getMonth() && birthDate.getDayOfMonth() == now.getDayOfMonth();
     }
 
     private UUID extractCurrentUserId(String bearerToken) {
