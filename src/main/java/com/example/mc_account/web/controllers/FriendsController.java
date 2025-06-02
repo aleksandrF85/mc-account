@@ -46,7 +46,6 @@ public class FriendsController {
             @RequestParam(required = false, defaultValue = "5") int size) {
 
         AccountSearchDto request = new AccountSearchDto();
-
 //        DtoUtils.setIfNotNull(firstName, request::setAuthor);
         DtoUtils.setIfNotNull(firstName, request::setFirstName);
         DtoUtils.setIfNotNull(ageTo, request::setAgeTo);
@@ -55,24 +54,34 @@ public class FriendsController {
         DtoUtils.setIfNotNull(city, request::setCity);
         request.setDeleted(false);
 
+        Pageable pageable = PageRequest.of(page, size);
+
         if (statusCode == null || statusCode.isEmpty()) {
-            return ResponseEntity.badRequest().body(Page.empty());
+            return ResponseEntity.badRequest().body(Page.empty(pageable));
         }
 
-        Pageable pageable = PageRequest.of(page, size);
-        StatusCode sc = StatusCode.valueOf(statusCode);
+        StatusCode sc;
+        try {
+            sc = StatusCode.valueOf(statusCode);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Page.empty(pageable));
+        }
 
         List<String> friendIds = friendsWebClientService.getIdsByStatusCode(bearerToken, statusCode);
+        log.info("Found friend IDs: {}", friendIds);
+
+        if (friendIds == null || friendIds.isEmpty()) {
+            return ResponseEntity.ok(Page.empty(pageable));
+        }
 
         request.setIds(friendIds);
-
         Page<Account> filtered = accountServiceImpl.search(request, pageable);
-        Page<AccountDataDto> dtoPage = filtered
-                .map(account -> {
-                    AccountDataDto dto = accountMapper.accountToDataDto(account);
-                    dto.setStatusCode(sc);
-                    return dto;
-                });
+
+        Page<AccountDataDto> dtoPage = filtered.map(account -> {
+            AccountDataDto dto = accountMapper.accountToDataDto(account);
+            dto.setStatusCode(sc);
+            return dto;
+        });
 
         return ResponseEntity.ok(dtoPage);
     }
