@@ -35,7 +35,7 @@ public class FriendsController {
 
     @GetMapping
     @Loggable
-    public ResponseEntity<Page<AccountDataDto>> getFriends(
+    public ResponseEntity<PagedResponse<AccountDataDto>> getFriends(
             @RequestHeader(value = "Authorization") String bearerToken,
             @RequestParam(required = false) String statusCode,
             @RequestParam(required = false) String firstName,
@@ -66,22 +66,22 @@ public class FriendsController {
 
         Page<Account> filtered = accountServiceImpl.search(request, pageable);
 
-        Page<AccountDataDto> dtoPage = filtered
+        List<AccountDataDto> content = filtered.stream()
                 .map(account -> {
                     AccountDataDto dto = accountMapper.accountToDataDto(account);
                     dto.setStatusCode(sc);
                     return dto;
-                });
+                })
+                .toList();
 
-
-//        PagedResponse<AccountDataDto> response = new PagedResponse<>();
-//        response.setContent(content);
-//        response.setTotalPages(filtered.getTotalPages());
-//        response.setTotalElements(filtered.getTotalElements());
+        PagedResponse<AccountDataDto> response = new PagedResponse<>();
+        response.setContent(content);
+        response.setTotalPages(filtered.getTotalPages());
+        response.setTotalElements(filtered.getTotalElements());
 //        response.setPageNumber(filtered.getNumber());
 //        response.setPageSize(filtered.getSize());
 
-        return ResponseEntity.ok(dtoPage);
+        return ResponseEntity.ok(response);
     }
 
 }
