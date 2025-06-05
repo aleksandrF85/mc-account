@@ -2,11 +2,9 @@ package com.example.mc_account.web.controllers;
 
 
 import com.example.mc_account.aop.Loggable;
-import com.example.mc_account.dto.AccountDataDto;
-import com.example.mc_account.dto.AccountMeDto;
-import com.example.mc_account.dto.AccountResponseDto;
-import com.example.mc_account.dto.AccountUpdateDto;
+import com.example.mc_account.dto.*;
 import com.example.mc_account.dto.filter.AccountSearchDto;
+import com.example.mc_account.dto.response.PagedResponse;
 import com.example.mc_account.mapper.AccountMapper;
 import com.example.mc_account.model.Account;
 import com.example.mc_account.model.StatusCode;
@@ -151,7 +149,7 @@ public class AccountController {
 
     @GetMapping("/search")
     @Loggable
-    public ResponseEntity<Page<AccountDataDto>> searchAccounts(
+    public ResponseEntity<PagedResponse<AccountDataDto>> searchAccounts(
             @RequestHeader(value = "Authorization") String bearerToken,
             @RequestParam(required = false) String author,
             @RequestParam(required = false) List<String> ids,
@@ -182,14 +180,21 @@ public class AccountController {
         Pageable pageable = PageRequest.of(page, size);
 
         Page<Account> filtered = accountServiceImpl.search(request, pageable);
-        Page<AccountDataDto> dtoPage = filtered.map(accountMapper::accountToDataDto);
+        List<AccountDataDto> content = filtered.map(accountMapper::accountToDataDto).getContent();
 
-        return ResponseEntity.ok(dtoPage);
+        PagedResponse<AccountDataDto> response = new PagedResponse<>();
+        response.setContent(content);
+        response.setTotalPages(filtered.getTotalPages());
+        response.setTotalElements(filtered.getTotalElements());
+        response.setPageNumber(filtered.getNumber());
+        response.setPageSize(filtered.getSize());
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/search/statusCode")
     @Loggable
-    public ResponseEntity<Page<AccountDataDto>> searchByStatusCode(
+    public ResponseEntity<PagedResponse<AccountDataDto>> searchByStatusCode(
             @RequestHeader(value = "Authorization") String bearerToken,
             @RequestParam(required = false) String statusCode,
             @RequestParam(required = false) String firstName,
@@ -197,7 +202,7 @@ public class AccountController {
             @RequestParam(defaultValue = "5") int size) {
 
         if (statusCode == null || statusCode.isEmpty()) {
-            return ResponseEntity.badRequest().body(Page.empty());
+            return ResponseEntity.badRequest().body(null);
         }
 
         Pageable pageable = PageRequest.of(page, size);
@@ -211,15 +216,21 @@ public class AccountController {
         request.setDeleted(false);
 
         Page<Account> filtered = accountServiceImpl.search(request, pageable);
-        Page<AccountDataDto> dtoPage = filtered
+        List<AccountDataDto> content = filtered
                 .map(account -> {
                     AccountDataDto dto = accountMapper.accountToDataDto(account);
                     dto.setStatusCode(sc);
                     return dto;
-                });
+                }).getContent();
 
-        return ResponseEntity.ok(dtoPage);
-    }
+        PagedResponse<AccountDataDto> response = new PagedResponse<>();
+        response.setContent(content);
+        response.setTotalPages(filtered.getTotalPages());
+        response.setTotalElements(filtered.getTotalElements());
+        response.setPageNumber(filtered.getNumber());
+        response.setPageSize(filtered.getSize());
+
+        return ResponseEntity.ok(response);    }
 
     private UUID extractCurrentUserId(String bearerToken) {
         String email = JwtTokenUtils.parseJwtToken(bearerToken).get("sub").toString();

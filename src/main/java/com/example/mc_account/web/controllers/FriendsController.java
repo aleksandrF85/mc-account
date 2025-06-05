@@ -2,6 +2,7 @@ package com.example.mc_account.web.controllers;
 
 import com.example.mc_account.aop.Loggable;
 import com.example.mc_account.dto.AccountDataDto;
+import com.example.mc_account.dto.FriendDto;
 import com.example.mc_account.dto.filter.AccountSearchDto;
 import com.example.mc_account.dto.response.PagedResponse;
 import com.example.mc_account.mapper.AccountMapper;
@@ -35,7 +36,7 @@ public class FriendsController {
 
     @GetMapping
     @Loggable
-    public ResponseEntity<PagedResponse<AccountDataDto>> getFriends(
+    public ResponseEntity<PagedResponse<FriendDto>> getFriends(
             @RequestHeader(value = "Authorization") String bearerToken,
             @RequestParam(required = false) String statusCode,
             @RequestParam(required = false) String firstName,
@@ -66,20 +67,20 @@ public class FriendsController {
 
         Page<Account> filtered = accountServiceImpl.search(request, pageable);
 
-        List<AccountDataDto> content = filtered.stream()
+        List<FriendDto> content = filtered.stream()
                 .map(account -> {
-                    AccountDataDto dto = accountMapper.accountToDataDto(account);
+                    FriendDto dto = accountMapper.accountToFriendDto(account);
                     dto.setStatusCode(sc);
                     return dto;
                 })
                 .toList();
 
-        PagedResponse<AccountDataDto> response = new PagedResponse<>();
+        PagedResponse<FriendDto> response = new PagedResponse<>();
         response.setContent(content);
         response.setTotalPages(filtered.getTotalPages());
         response.setTotalElements(filtered.getTotalElements());
-//        response.setPageNumber(filtered.getNumber());
-//        response.setPageSize(filtered.getSize());
+        response.setPageNumber(filtered.getNumber());
+        response.setPageSize(filtered.getSize());
 
         return ResponseEntity.ok(response);
     }
