@@ -11,6 +11,7 @@ import com.example.mc_account.model.StatusCode;
 import com.example.mc_account.services.*;
 import com.example.mc_account.utils.DtoUtils;
 import com.example.mc_account.utils.JwtTokenUtils;
+import com.example.mc_account.utils.PaginationUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -180,16 +181,9 @@ public class AccountController {
         Pageable pageable = PageRequest.of(page, size);
 
         Page<Account> filtered = accountServiceImpl.search(request, pageable);
-        List<AccountDataDto> content = filtered.map(accountMapper::accountToDataDto).getContent();
+        Page<AccountDataDto> content = filtered.map(accountMapper::accountToDataDto);
 
-        PagedResponse<AccountDataDto> response = new PagedResponse<>();
-        response.setContent(content);
-        response.setTotalPages(filtered.getTotalPages());
-        response.setTotalElements(filtered.getTotalElements());
-        response.setPageNumber(filtered.getNumber());
-        response.setPageSize(filtered.getSize());
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(PaginationUtils.toPagedResponse(content));
     }
 
     @GetMapping("/search/statusCode")
@@ -216,21 +210,15 @@ public class AccountController {
         request.setDeleted(false);
 
         Page<Account> filtered = accountServiceImpl.search(request, pageable);
-        List<AccountDataDto> content = filtered
+        Page<AccountDataDto> content = filtered
                 .map(account -> {
                     AccountDataDto dto = accountMapper.accountToDataDto(account);
                     dto.setStatusCode(sc);
                     return dto;
-                }).getContent();
+                });
 
-        PagedResponse<AccountDataDto> response = new PagedResponse<>();
-        response.setContent(content);
-        response.setTotalPages(filtered.getTotalPages());
-        response.setTotalElements(filtered.getTotalElements());
-        response.setPageNumber(filtered.getNumber());
-        response.setPageSize(filtered.getSize());
-
-        return ResponseEntity.ok(response);    }
+        return ResponseEntity.ok(PaginationUtils.toPagedResponse(content));
+    }
 
     private UUID extractCurrentUserId(String bearerToken) {
         String email = JwtTokenUtils.parseJwtToken(bearerToken).get("sub").toString();

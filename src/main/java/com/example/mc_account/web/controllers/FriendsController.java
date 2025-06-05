@@ -11,6 +11,7 @@ import com.example.mc_account.model.StatusCode;
 import com.example.mc_account.services.AccountService;
 import com.example.mc_account.services.FriendsWebClientService;
 import com.example.mc_account.utils.DtoUtils;
+import com.example.mc_account.utils.PaginationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -67,22 +68,13 @@ public class FriendsController {
 
         Page<Account> filtered = accountServiceImpl.search(request, pageable);
 
-        List<FriendDto> content = filtered.stream()
-                .map(account -> {
-                    FriendDto dto = accountMapper.accountToFriendDto(account);
-                    dto.setStatusCode(sc);
-                    return dto;
-                })
-                .toList();
+        Page<FriendDto> content = filtered.map(account -> {
+            FriendDto dto = accountMapper.accountToFriendDto(account);
+            dto.setStatusCode(sc);
+            return dto;
+        });
 
-        PagedResponse<FriendDto> response = new PagedResponse<>();
-        response.setContent(content);
-        response.setTotalPages(filtered.getTotalPages());
-        response.setTotalElements(filtered.getTotalElements());
-        response.setPageNumber(filtered.getNumber());
-        response.setPageSize(filtered.getSize());
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(PaginationUtils.toPagedResponse(content));
     }
 
 }
