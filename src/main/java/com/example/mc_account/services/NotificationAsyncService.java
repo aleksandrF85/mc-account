@@ -26,6 +26,8 @@ public class NotificationAsyncService {
         List<Account> friends = accountServiceImpl.findAllByIds(friendIds);
         OffsetDateTime now = OffsetDateTime.now();
 
+        String email = accountServiceImpl.findById(currentUserId).getEmail();
+
         friends.stream()
                 .filter(acc -> acc.getBirthDate() != null &&
                         acc.getBirthDate().getMonth() == now.getMonth() &&
@@ -33,7 +35,7 @@ public class NotificationAsyncService {
                 .forEach(acc -> {
                     try {
                         eventProducerService.sendNotificationEvent(
-                                eventFactoryService.createBirthdayNotificationEvent(acc, currentUserId)
+                                eventFactoryService.createBirthdayNotificationEvent(acc, currentUserId, email)
                         );
                         log.info("[ASYNC] Sent birthday notification to {}", acc.getId());
                     } catch (Exception e) {

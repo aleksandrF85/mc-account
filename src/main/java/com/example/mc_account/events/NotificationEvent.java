@@ -21,4 +21,5 @@ public class NotificationEvent {
     private MicroServiceName serviceName;
     private NotificationType notificationType;
     private Boolean isReaded;
+    private String email;
 }

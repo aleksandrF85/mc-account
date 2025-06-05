@@ -28,7 +28,7 @@ public class AccountEventFactoryService {
         );
     }
 
-    public NotificationEvent createBirthdayNotificationEvent(Account birthdayPerson, UUID receiverId) {
+    public NotificationEvent createBirthdayNotificationEvent(Account birthdayPerson, UUID receiverId, String email) {
         return NotificationEvent.builder()
                 .eventId(UUID.randomUUID())
                 .id(birthdayPerson.getId())
@@ -36,6 +36,7 @@ public class AccountEventFactoryService {
                 .notificationType(NotificationType.FRIEND_BIRTHDAY)
                 .serviceName(MicroServiceName.MC_ACCOUNT)
                 .sentTime(OffsetDateTime.now().toLocalDateTime())
+                .email(email)
                 .content(String.format(
                         "У пользователя %s %s сегодня день рождения!",
                         birthdayPerson.getFirstName(),
