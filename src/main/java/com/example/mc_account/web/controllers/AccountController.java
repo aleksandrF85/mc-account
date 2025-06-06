@@ -2,16 +2,17 @@ package com.example.mc_account.web.controllers;
 
 
 import com.example.mc_account.aop.Loggable;
-import com.example.mc_account.dto.*;
+import com.example.mc_account.dto.AccountDataDto;
+import com.example.mc_account.dto.AccountMeDto;
+import com.example.mc_account.dto.AccountResponseDto;
+import com.example.mc_account.dto.AccountUpdateDto;
 import com.example.mc_account.dto.filter.AccountSearchDto;
-import com.example.mc_account.dto.response.PagedResponse;
 import com.example.mc_account.mapper.AccountMapper;
 import com.example.mc_account.model.Account;
 import com.example.mc_account.model.StatusCode;
 import com.example.mc_account.services.*;
 import com.example.mc_account.utils.DtoUtils;
 import com.example.mc_account.utils.JwtTokenUtils;
-import com.example.mc_account.utils.PaginationUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -150,7 +151,7 @@ public class AccountController {
 
     @GetMapping("/search")
     @Loggable
-    public ResponseEntity<PagedResponse<AccountDataDto>> searchAccounts(
+    public ResponseEntity<Page<AccountDataDto>> searchAccounts(
             @RequestHeader(value = "Authorization") String bearerToken,
             @RequestParam(required = false) String author,
             @RequestParam(required = false) List<String> ids,
@@ -181,14 +182,14 @@ public class AccountController {
         Pageable pageable = PageRequest.of(page, size);
 
         Page<Account> filtered = accountServiceImpl.search(request, pageable);
-        Page<AccountDataDto> content = filtered.map(accountMapper::accountToDataDto);
+        Page<AccountDataDto> dtoPage = filtered.map(accountMapper::accountToDataDto);
 
-        return ResponseEntity.ok(PaginationUtils.toPagedResponse(content));
+        return ResponseEntity.ok(dtoPage);
     }
 
     @GetMapping("/search/statusCode")
     @Loggable
-    public ResponseEntity<PagedResponse<AccountDataDto>> searchByStatusCode(
+    public ResponseEntity<Page<AccountDataDto>> searchByStatusCode(
             @RequestHeader(value = "Authorization") String bearerToken,
             @RequestParam(required = false) String statusCode,
             @RequestParam(required = false) String firstName,
@@ -196,7 +197,7 @@ public class AccountController {
             @RequestParam(defaultValue = "5") int size) {
 
         if (statusCode == null || statusCode.isEmpty()) {
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().body(Page.empty());
         }
 
         Pageable pageable = PageRequest.of(page, size);
@@ -210,14 +211,14 @@ public class AccountController {
         request.setDeleted(false);
 
         Page<Account> filtered = accountServiceImpl.search(request, pageable);
-        Page<AccountDataDto> content = filtered
+        Page<AccountDataDto> dtoPage = filtered
                 .map(account -> {
                     AccountDataDto dto = accountMapper.accountToDataDto(account);
                     dto.setStatusCode(sc);
                     return dto;
                 });
 
-        return ResponseEntity.ok(PaginationUtils.toPagedResponse(content));
+        return ResponseEntity.ok(dtoPage);
     }
 
     private UUID extractCurrentUserId(String bearerToken) {

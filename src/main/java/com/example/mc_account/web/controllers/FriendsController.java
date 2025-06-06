@@ -1,17 +1,14 @@
 package com.example.mc_account.web.controllers;
 
 import com.example.mc_account.aop.Loggable;
-import com.example.mc_account.dto.AccountDataDto;
 import com.example.mc_account.dto.FriendDto;
 import com.example.mc_account.dto.filter.AccountSearchDto;
-import com.example.mc_account.dto.response.PagedResponse;
 import com.example.mc_account.mapper.AccountMapper;
 import com.example.mc_account.model.Account;
 import com.example.mc_account.model.StatusCode;
 import com.example.mc_account.services.AccountService;
 import com.example.mc_account.services.FriendsWebClientService;
 import com.example.mc_account.utils.DtoUtils;
-import com.example.mc_account.utils.PaginationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -37,7 +34,7 @@ public class FriendsController {
 
     @GetMapping
     @Loggable
-    public ResponseEntity<PagedResponse<FriendDto>> getFriends(
+    public ResponseEntity<Page<FriendDto>> getFriends(
             @RequestHeader(value = "Authorization") String bearerToken,
             @RequestParam(required = false) String statusCode,
             @RequestParam(required = false) String firstName,
@@ -68,13 +65,13 @@ public class FriendsController {
 
         Page<Account> filtered = accountServiceImpl.search(request, pageable);
 
-        Page<FriendDto> content = filtered.map(account -> {
+        Page<FriendDto> dtoPage = filtered.map(account -> {
             FriendDto dto = accountMapper.accountToFriendDto(account);
             dto.setStatusCode(sc);
             return dto;
         });
 
-        return ResponseEntity.ok(PaginationUtils.toPagedResponse(content));
+        return ResponseEntity.ok(dtoPage);
     }
 
 }
