@@ -2,7 +2,9 @@ plugins {
     java
     id("org.springframework.boot") version "3.4.3"
     id("io.spring.dependency-management") version "1.1.7"
+    id("jacoco")
 }
+
 
 group = "com.example"
 version = "0.0.1-SNAPSHOT"
@@ -34,8 +36,6 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
     implementation("org.springframework.kafka:spring-kafka")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
-//    implementation("org.springframework.boot:spring-boot-starter-websocket")
-//    implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("com.nimbusds:nimbus-jose-jwt:9.30")
     implementation("org.apache.commons:commons-lang3:3.15.0")
     implementation("org.mapstruct:mapstruct:1.5.5.Final")
@@ -43,11 +43,11 @@ dependencies {
     runtimeOnly("org.postgresql:postgresql")
     annotationProcessor("org.projectlombok:lombok")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
-//    testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
     testImplementation("org.springframework.kafka:spring-kafka-test")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("javax.persistence:javax.persistence-api:2.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 }
@@ -59,4 +59,32 @@ dependencyManagement {
 }
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+jacoco {
+    toolVersion = "0.8.11" // актуальная версия на 2025 год
+}
+
+tasks.test {
+    useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport) // создаёт отчёт после тестов
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test) // запускается после тестов
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        csv.required.set(false)
+    }
+}
+
+tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.jacocoTestReport)
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.75".toBigDecimal() // минимум 75% покрытия
+            }
+        }
+    }
 }

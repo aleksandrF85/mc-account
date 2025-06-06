@@ -2,7 +2,9 @@ package com.example.mc_account.dto;
 
 import com.example.mc_account.model.RoleType;
 import com.example.mc_account.model.StatusCode;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
 import java.util.Set;
@@ -10,7 +12,7 @@ import java.util.Set;
 
 @Data
 public class AccountResponseDto {
-    private final Set<RoleType> role;
+    private Set<RoleType> role;
     private String id;
     private String firstName;
     private String lastName;
