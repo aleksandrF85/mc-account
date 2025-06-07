@@ -62,10 +62,17 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Account findById(UUID id) {
 
-        return repository.findById(id)
+        Account account = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(MessageFormat.format(
                         "Пользователь с таким ID {0} не найден!", id
                 )));
+
+        if (account.isDeleted()) {
+            throw new EntityNotFoundException(MessageFormat.format(
+                    "Пользователь с таким ID {0} удален!", id));
+        }
+
+        return account;
     }
 
     @Override
