@@ -181,8 +181,8 @@ public class AccountController {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<Account> filtered = accountServiceImpl.search(request, pageable);
-        Page<AccountDataDto> dtoPage = filtered.map(accountMapper::accountToDataDto);
+        Page<AccountDataDto> dtoPage = accountServiceImpl.search(request, pageable)
+                .map(accountMapper::accountToDataDto);
 
         return ResponseEntity.ok(dtoPage);
     }
@@ -210,8 +210,7 @@ public class AccountController {
         request.setIds(friendIds);
         request.setDeleted(false);
 
-        Page<Account> filtered = accountServiceImpl.search(request, pageable);
-        Page<AccountDataDto> dtoPage = filtered
+        Page<AccountDataDto> dtoPage = accountServiceImpl.search(request, pageable)
                 .map(account -> {
                     AccountDataDto dto = accountMapper.accountToDataDto(account);
                     dto.setStatusCode(sc);
