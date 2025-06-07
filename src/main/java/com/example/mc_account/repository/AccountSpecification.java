@@ -1,4 +1,4 @@
-package com.example.mc_account.reposirory;
+package com.example.mc_account.repository;
 
 import com.example.mc_account.dto.filter.AccountSearchDto;
 import com.example.mc_account.model.Account;

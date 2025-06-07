@@ -1,15 +1,15 @@
 package com.example.mc_account.mapper;
 
-import com.example.mc_account.dto.AccountDataDto;
-import com.example.mc_account.dto.AccountMeDto;
-import com.example.mc_account.dto.AccountResponseDto;
-import com.example.mc_account.dto.AccountUpdateDto;
+import com.example.mc_account.dto.*;
 import com.example.mc_account.events.UserRegistration;
 import com.example.mc_account.model.Account;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.ReportingPolicy;
+
+import java.time.OffsetDateTime;
+import java.time.Period;
 
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.IGNORE)
@@ -34,4 +34,12 @@ public interface AccountMapper {
     @Mapping(target = "online", constant = "false")
     Account userRegistrationToAccount(UserRegistration registration);
 
+    @Mapping(source = "id", target = "friendId")
+    @Mapping(target = "age", expression = "java(getAge(account.getBirthDate()))")
+    FriendDto accountToFriendDto(Account account);
+
+    default Integer getAge(OffsetDateTime birthDate) {
+        if (birthDate == null) return null;
+        return Period.between(birthDate.toLocalDate(), OffsetDateTime.now().toLocalDate()).getYears();
+    }
 }

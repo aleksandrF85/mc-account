@@ -17,17 +17,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -39,13 +36,14 @@ public class AccountController {
 
     public final AccountService accountServiceImpl;
 
-    public final KafkaProducerService kafkaProducerService;
-
     private final FriendsWebClientService friendsWebClientService;
 
     private final KafkaProducerService eventProducerService;
 
     private final AccountEventFactoryService eventFactoryService;
+
+    private final NotificationAsyncService notificationAsyncService;
+
 
     @GetMapping("/me")
     @Loggable
@@ -58,7 +56,7 @@ public class AccountController {
 
         List<String> friendIds = friendsWebClientService.getFriendsIds(bearerToken);
         if (!friendIds.isEmpty()) {
-            notifyFriendBirthdays(friendIds, account.getId());
+            notificationAsyncService.notifyFriendBirthdaysAsync(friendIds, account.getId());
         }
 
         return ResponseEntity.ok(
@@ -183,8 +181,8 @@ public class AccountController {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<Account> filtered = accountServiceImpl.search(request, pageable);
-        Page<AccountDataDto> dtoPage = filtered.map(accountMapper::accountToDataDto);
+        Page<AccountDataDto> dtoPage = accountServiceImpl.search(request, pageable)
+                .map(accountMapper::accountToDataDto);
 
         return ResponseEntity.ok(dtoPage);
     }
@@ -212,8 +210,7 @@ public class AccountController {
         request.setIds(friendIds);
         request.setDeleted(false);
 
-        Page<Account> filtered = accountServiceImpl.search(request, pageable);
-        Page<AccountDataDto> dtoPage = filtered
+        Page<AccountDataDto> dtoPage = accountServiceImpl.search(request, pageable)
                 .map(account -> {
                     AccountDataDto dto = accountMapper.accountToDataDto(account);
                     dto.setStatusCode(sc);
@@ -221,19 +218,6 @@ public class AccountController {
                 });
 
         return ResponseEntity.ok(dtoPage);
-    }
-
-    private void notifyFriendBirthdays(List<String> friendIds, UUID currentUserId) {
-        List<Account> friends = accountServiceImpl.findAllByIds(friendIds);
-        OffsetDateTime now = OffsetDateTime.now();
-
-        friends.stream()
-                .filter(acc -> acc.getBirthDate() != null && isTodayBirthday(acc.getBirthDate(), now))
-                .forEach(acc -> eventProducerService.sendNotificationEvent(eventFactoryService.createBirthdayNotificationEvent(acc, currentUserId)));
-    }
-
-    private boolean isTodayBirthday(OffsetDateTime birthDate, OffsetDateTime now) {
-        return birthDate.getMonth() == now.getMonth() && birthDate.getDayOfMonth() == now.getDayOfMonth();
     }
 
     private UUID extractCurrentUserId(String bearerToken) {

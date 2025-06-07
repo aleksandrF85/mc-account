@@ -10,6 +10,8 @@ import java.util.UUID;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class NotificationEvent {
 
     private UUID id;
@@ -21,4 +23,5 @@ public class NotificationEvent {
     private MicroServiceName serviceName;
     private NotificationType notificationType;
     private Boolean isReaded;
+    private String email;
 }

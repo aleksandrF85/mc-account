@@ -3,11 +3,8 @@ package com.example.mc_account.aop;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.After;
-import org.aspectj.lang.annotation.AfterReturning;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -22,61 +19,53 @@ import java.util.Map;
 @Slf4j
 public class LoggingAspect {
 
-    /**
-     * Вы можете реализовать аспект, который будет выполняться перед методом, помеченным вашей аннотацией.
-     * Например, @Before("@annotation(myAnnotation)") означает, что этот аспект будет выполняться перед методом, который помечен аннотацией myAnnotation.
-     * Вы можете получить HttpServletRequest за пределами контроллера, используя контекст:
-     * RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-     * HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
-     * С помощью этого объекта вы можете извлечь переменные пути запроса:
-     * var pathVariables = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-     * Также вы можете извлечь и GET-параметры запроса:
-     * request.getParameter(“paramName”)
-     **/
+    @Around("@annotation(Loggable)")
+    public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
+        long start = System.currentTimeMillis();
 
-
-    @Before("@annotation(Loggable)")
-    public void logBefore(JoinPoint joinPoint) {
-
-        log.info("Before execution of {}", joinPoint.getSignature().getName());
-
+        // Получаем HttpServletRequest
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-        HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
-        var pathVariables = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
-        var parameterMap = request.getParameterMap();
+        HttpServletRequest request = null;
+        if (requestAttributes instanceof ServletRequestAttributes) {
+            request = ((ServletRequestAttributes) requestAttributes).getRequest();
+        }
 
-        log.info("Request method: " + request.getMethod());
-        log.info("Request URI: " + request.getRequestURI());
-        log.info("Header: " + request.getHeader("Authorization"));
+        // Логируем до вызова метода
+        log.info("Before execution of {}", joinPoint.getSignature().getName());
+        if (request != null) {
+            var pathVariables = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+            var parameterMap = request.getParameterMap();
 
-        if (!pathVariables.isEmpty()) {
-            log.info("Path Variables:");
-            for (String name : pathVariables.keySet()) {
-                String key = name;
-                String value = pathVariables.get(name);
-                log.info("\t" + key + " " + value);
+            log.info("Request method: {}", request.getMethod());
+            log.info("Request URI: {}", request.getRequestURI());
+            log.info("Header Authorization: {}", request.getHeader("Authorization"));
+
+            if (pathVariables != null && !pathVariables.isEmpty()) {
+                log.info("Path Variables:");
+                pathVariables.forEach((k, v) -> log.info("\t{}: {}", k, v));
+            }
+
+            if (!parameterMap.isEmpty()) {
+                log.info("Parameter Map:");
+                parameterMap.forEach((k, v) -> log.info("\t{}: {}", k, Arrays.toString(v)));
             }
         }
 
-        if (!parameterMap.isEmpty()) {
-            log.info("Parameter Map:");
-            for (String name : parameterMap.keySet()) {
-                String key = name;
-                String value = Arrays.toString(parameterMap.get(name));
-                log.info("\t" + key + " " + value);
-            }
+        try {
+            // Выполняем целевой метод
+            Object result = joinPoint.proceed();
+
+            long duration = System.currentTimeMillis() - start;
+            log.info("After returning from {}, with result {}. Execution time: {} ms",
+                    joinPoint.getSignature().getName(), result, duration);
+
+            return result;
+        } catch (Throwable ex) {
+            long duration = System.currentTimeMillis() - start;
+            log.error("Method {} threw exception after {} ms", joinPoint.getSignature().getName(), duration, ex);
+            throw ex;
+        } finally {
+            log.info("After execution of {}", joinPoint.getSignature().getName());
         }
-
-
-    }
-
-    @After("@annotation(Loggable)")
-    public void logAfter(JoinPoint joinPoint) {
-        log.info("After execution of {}", joinPoint.getSignature().getName());
-    }
-
-    @AfterReturning("@annotation(Loggable)")
-    public void logAfterReturning(JoinPoint joinPoint, Object result) {
-        log.info("After returning from {}, with result {}", joinPoint.getSignature().getName(), result);
     }
 }

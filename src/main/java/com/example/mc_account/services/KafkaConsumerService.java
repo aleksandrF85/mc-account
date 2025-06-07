@@ -22,7 +22,7 @@ public class KafkaConsumerService {
     @KafkaListener(topics = "${app.kafka.userRegistration}",
             groupId = "${app.kafka.groupId}",
             containerFactory = "userRegistrationEventKafkaListenerContainerFactory")
-    public void createAccountByUserRegistrationEvent(UserRegistrationEvent event) {
+    public void createAccountByUserRegistration(UserRegistrationEvent event) {
         log.info("Received event: {}", event);
         eventHandlerService.handleUserRegistrationEvent(event);
     }
