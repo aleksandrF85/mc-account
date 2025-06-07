@@ -4,7 +4,6 @@ import com.example.mc_account.events.ChangeEmailEvent;
 import com.example.mc_account.events.ResetPasswordEvent;
 import com.example.mc_account.events.UserRegistrationEvent;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
@@ -12,8 +11,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class KafkaConsumerService {
 
-    @Autowired
-    private AccountEventHandlerService eventHandlerService;
+    private final AccountEventHandlerService eventHandlerService;
 
     public KafkaConsumerService(AccountEventHandlerService eventHandlerService) {
         this.eventHandlerService = eventHandlerService;

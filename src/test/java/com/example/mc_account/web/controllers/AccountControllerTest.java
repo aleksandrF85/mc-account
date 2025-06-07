@@ -116,10 +116,10 @@ class AccountControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                         {
-                          \"firstName\": \"John\",
-                          \"lastName\": \"Doe\",
-                          \"email\": \"john.doe@example.com\",
-                          \"password\": \"password123\"
+                          "firstName": "John",
+                          "lastName": "Doe",
+                          "email": "john.doe@example.com",
+                          "password": "password123"
                         }
                     """))
                 .andExpect(status().isCreated());
