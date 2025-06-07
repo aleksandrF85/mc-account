@@ -34,12 +34,4 @@ public interface AccountMapper {
     @Mapping(target = "online", constant = "false")
     Account userRegistrationToAccount(UserRegistration registration);
 
-    @Mapping(source = "id", target = "friendId")
-    @Mapping(target = "age", expression = "java(getAge(account.getBirthDate()))")
-    FriendDto accountToFriendDto(Account account);
-
-    default Integer getAge(OffsetDateTime birthDate) {
-        if (birthDate == null) return null;
-        return Period.between(birthDate.toLocalDate(), OffsetDateTime.now().toLocalDate()).getYears();
-    }
 }
