@@ -162,8 +162,8 @@ public class AccountController {
             @RequestParam(required = false) String country,
             @RequestParam(required = false) String city,
             @RequestParam(required = false) Boolean isDelete,
-            @RequestParam(required = false, defaultValue = "0") int page,
-            @RequestParam(required = false, defaultValue = "5") int size) {
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
 
         UUID currentUserId = extractCurrentUserId(bearerToken);
 
@@ -179,12 +179,14 @@ public class AccountController {
         request.setDeleted(Boolean.TRUE.equals(isDelete));
         request.setCurrentUserId(currentUserId);
 
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = (page == null || size == null)
+                ? Pageable.unpaged()
+                : PageRequest.of(page, size);
 
-        Page<AccountDataDto> dtoPage = accountServiceImpl.search(request, pageable)
+        var result = accountServiceImpl.search(request, pageable)
                 .map(accountMapper::accountToDataDto);
 
-        return ResponseEntity.ok(dtoPage);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/search/statusCode")
@@ -193,15 +195,14 @@ public class AccountController {
             @RequestHeader(value = "Authorization") String bearerToken,
             @RequestParam(required = false) String statusCode,
             @RequestParam(required = false) String firstName,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size) {
 
         if (statusCode == null || statusCode.isEmpty()) {
             return ResponseEntity.badRequest().body(Page.empty());
         }
 
-        Pageable pageable = PageRequest.of(page, size);
-        StatusCode sc = StatusCode.valueOf(statusCode);
+       StatusCode sc = StatusCode.valueOf(statusCode);
 
         List<String> friendIds = friendsWebClientService.getIdsByStatusCode(bearerToken, statusCode);
 
@@ -210,14 +211,18 @@ public class AccountController {
         request.setIds(friendIds);
         request.setDeleted(false);
 
-        Page<AccountDataDto> dtoPage = accountServiceImpl.search(request, pageable)
+        Pageable pageable = (page == null || size == null)
+                ? Pageable.unpaged()
+                : PageRequest.of(page, size);
+
+        var result = accountServiceImpl.search(request, pageable)
                 .map(account -> {
                     AccountDataDto dto = accountMapper.accountToDataDto(account);
                     dto.setStatusCode(sc);
                     return dto;
                 });
 
-        return ResponseEntity.ok(dtoPage);
+        return ResponseEntity.ok(result);
     }
 
     private UUID extractCurrentUserId(String bearerToken) {
