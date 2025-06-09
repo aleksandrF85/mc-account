@@ -1,40 +1,35 @@
 spring:
-  application:
-    name: mc-account
-
   main:
     allow-circular-references: true
-
-  datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:5432/${POSTGRES_DB_NAME:account_db}
-    username: ${POSTGRES_USER:postgres}
-    password: ${POSTGRES_PASSWORD:postgres}
-    hikari:
-      schema: account_schema
-      connection-timeout: 10000
-      connection-init-sql: CREATE SCHEMA IF NOT EXISTS account_schema
-
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: update
-    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQL94Dialect
     properties:
       hibernate:
+        #        hbm2ddl:
+        #          auto: validate
         dialect: org.hibernate.dialect.PostgreSQLDialect
-
+        transaction:
+          jta:
+            platform: enable
+    hibernate:
+      ddl-auto: update #create-drop
+    generate-ddl: true
+    show-sql: true
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost:5432}/${POSTGRES_DB_NAME:account_db}
+    username: postgres
+    password: postgres
+    hikari:
+      schema: account_schema
+      connection-init-sql: CREATE SCHEMA IF NOT EXISTS account_schema
+      connection-timeout: 10000
   liquibase:
     enabled: true
     change-log: classpath:/db/changelog/db.changelog-master.xml
-
+  application:
+    name: mc-account
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
-    producer:
-      acks: all
-      retries: 3
-      retry.backoff.ms: 1000
-      enable.idempotence: true
-
+    bootstrap-servers: localhost:9092
 eureka:
   client:
     register-with-eureka: true
@@ -44,7 +39,7 @@ eureka:
   instance:
     hostname: ${mc-account:localhost}
     prefer-ip-address: true
-
+#    instance-id: ${spring.application.name}:${random.uuid}
 app:
   kafka:
     enable: true
@@ -54,10 +49,8 @@ app:
     accountChanges: "ACCOUNT_UPDATES"
     notification: "account.events"
     groupId: "socialNetwork-group-id"
-
 server:
   port: 8080
-
 logging:
   level:
     org.springframework.cloud.netflix.eureka: DEBUG
