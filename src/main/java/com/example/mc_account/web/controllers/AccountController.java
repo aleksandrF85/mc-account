@@ -165,6 +165,13 @@ public class AccountController {
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size) {
 
+        if (author == null && (ids == null || ids.isEmpty()) &&
+                firstName == null && lastName == null &&
+                ageTo == null && ageFrom == null &&
+                country == null && city == null) {
+            return ResponseEntity.ok(Page.empty());
+        }        // Вернуть пустой список, если все параметры фильтрации отсутствуют
+
         UUID currentUserId = extractCurrentUserId(bearerToken);
 
         AccountSearchDto request = new AccountSearchDto();
