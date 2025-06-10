@@ -34,7 +34,7 @@ public interface AccountSpecification {
 
     static Specification<Account> byAccountIds(List<String> ids) {
         return (root, query, cb) -> {
-            if (ids == null) {
+            if (ids == null || ids.isEmpty()) {
                 return null;
             }
             List<UUID> uuidList = ids.stream().map(UUID::fromString).toList();
