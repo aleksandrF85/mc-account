@@ -12,6 +12,7 @@ import org.springframework.kafka.support.SendResult;
 
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -65,7 +66,7 @@ class KafkaProducerServiceImplTest {
         event.setReceiverId(UUID.randomUUID());
         event.setNotificationType(NotificationType.FRIEND_BIRTHDAY);
         event.setServiceName(MicroServiceName.MC_ACCOUNT);
-        event.setSentTime(LocalDateTime.now());
+        event.setSentTime(OffsetDateTime.now());
         event.setEmail("test@example.com");
         event.setContent("У пользователя Иван Иванов сегодня день рождения!");
         event.setIsReaded(false);

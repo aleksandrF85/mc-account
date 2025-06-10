@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Data
@@ -15,7 +15,7 @@ import java.util.UUID;
 public class NotificationEvent {
 
     private UUID id;
-    private LocalDateTime sentTime;
+    private OffsetDateTime sentTime;
     private UUID authorId;
     private UUID receiverId;
     private UUID eventId;
