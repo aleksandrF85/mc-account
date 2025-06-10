@@ -170,7 +170,7 @@ public class AccountController {
                 ageTo == null && ageFrom == null &&
                 country == null && city == null) {
             return ResponseEntity.ok(Page.empty());
-        }        // Вернуть пустой список, если все параметры фильтрации отсутствуют
+        } // Вернуть пустой список, если все параметры фильтрации отсутствуют
 
         UUID currentUserId = extractCurrentUserId(bearerToken);
 
@@ -212,6 +212,10 @@ public class AccountController {
        StatusCode sc = StatusCode.valueOf(statusCode);
 
         List<String> friendIds = friendsWebClientService.getIdsByStatusCode(bearerToken, statusCode);
+
+        if (friendIds == null || friendIds.isEmpty()) {
+            return ResponseEntity.ok(Page.empty());
+        } // Проверка: если список друзей пуст, сразу возвращаем пустой результат
 
         AccountSearchDto request = new AccountSearchDto();
         DtoUtils.setIfNotNull(firstName, request::setFirstName);

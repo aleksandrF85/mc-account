@@ -26,7 +26,7 @@ public interface AccountSpecification {
 
     static Specification<Account> notCurrentUser(UUID id) {
         return (root, query, cb) -> {
-            if (id == null) return null; // игнорируем фильтрацию по id, если не передан параметр
+            if (id == null) return null;
 
             return cb.notEqual(root.get("id"), id);
         };
@@ -34,8 +34,9 @@ public interface AccountSpecification {
 
     static Specification<Account> byAccountIds(List<String> ids) {
         return (root, query, cb) -> {
-            if (ids == null) return null; // игнорируем фильтрацию по id, если не передан параметр
-            if (ids.isEmpty()) return cb.disjunction(); // => WHERE false (возвращает пустой результат)
+            if (ids == null) {
+                return null;
+            }
             List<UUID> uuidList = ids.stream().map(UUID::fromString).toList();
             return root.get("id").in(uuidList);
         };
