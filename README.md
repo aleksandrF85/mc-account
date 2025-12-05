@@ -1,211 +1,144 @@
-# микросервис account-mc
+# account-mc — сервис управления аккаунтами
 
-### по умолчанию запускается на http://localhost:8080/ (при необходимости поменять в docker-compose.yml)
+Микросервис отвечает за создание, обновление, поиск и управление статусами пользовательских аккаунтов.  
+По умолчанию сервис запускается на порту **8080**.
 
-### cd docker
+---
 
-### docker-compose up
+```bash
+🚀 Запуск через Docker
 
-## *Получение информации о текущем аккаунте*
+cd docker
+docker-compose up
+После запуска сервис будет доступен по адресу:
+http://localhost:8080/
 
-[//]: # (operationId: getCurrentAccount)
+📘 API
+Большинство эндпоинтов требуют передачу JWT-токена:
+Authorization: "JwtToken"
 
-### GET
+👤 Работа с текущим аккаунтом
+▶ Получить данные своего аккаунта
+GET /api/v1/account/me
+Headers: Authorization
 
-## /api/v1/account/me
+▶ Обновить свой аккаунт
+PUT /api/v1/account/me
+Headers: Authorization
+Body:
 
-### RequestHeader
-
-- Authorization: "JwtToken"
-
-## *Обновление аккаунта*
-
-operationId: updateAccountMe
-
-### PUT
-
-## /api/v1/account/me
-
-### RequestHeader
-
-- Authorization: "JwtToken"
-
-### RequestBody
-
-````json
+json
 {
-"firstName": "",
-"lastName": "",
-"phone": "",
-"photo": "",
-"about": "",
-"city": "",
-"country": "",
-"birthDate": "",
-"emojiStatus": ""
+  "firstName": "",
+  "lastName": "",
+  "phone": "",
+  "photo": "",
+  "about": "",
+  "city": "",
+  "country": "",
+  "birthDate": "",
+  "emojiStatus": ""
 }
-````
 
-## *Пометить текущий аккаунт как удалённый*
+▶ Пометить свой аккаунт как удалённый
+DELETE /api/v1/account/me
+Headers: Authorization
 
-[//]: # (operationId: markAccountAsDeleted)
+🔎 Получение аккаунтов
+▶ Найти аккаунт по email
+GET /api/v1/account
+Params: email=string
 
-### DELETE
+▶ Получить аккаунт по ID
+GET /api/v1/account/{id}
+Path: id = UUID
 
-## /api/v1/account/me
+➕ Создание аккаунта
+▶ Создать новый аккаунт
+POST /api/v1/account
+Body:
 
-### RequestHeader
-
-- Authorization: "JwtToken"
-
-## *Получение аккаунта по email*
-
-[//]: # (operationId: getAccount)
-
-### GET
-
-## /api/v1/account
-
-### RequestParam
-
-- email: "String"
-
-## *Создание нового аккаунта*
-
-[//]: # (operationId: createAccount)
-
-### POST
-
-## /api/v1/account
-
-### RequestBody
-
-````json
+json
 {
-"id": "",
-"firstName": "",
-"lastName": "",
-"email": "",
-"password": "",
-"phone": "",
-"photo": "",
-"profileCover": "",
-"about": "",
-"city": "",
-"country": "",
-"statusCode": "FRIEND",
-"regDate": "",
-"birthDate": "",
-"messagePermission": "",
-"lastOnlineTime": "",
-"emojiStatus": "",
-"createdOn": "",
-"updatedOn": "",
-"deletionTimestamp": "",
-"blocked": false,
-"deleted": false,
-"isOnline": true
+  "id": "",
+  "firstName": "",
+  "lastName": "",
+  "email": "",
+  "password": "",
+  "phone": "",
+  "photo": "",
+  "profileCover": "",
+  "about": "",
+  "city": "",
+  "country": "",
+  "statusCode": "FRIEND",
+  "regDate": "",
+  "birthDate": "",
+  "messagePermission": "",
+  "lastOnlineTime": "",
+  "emojiStatus": "",
+  "createdOn": "",
+  "updatedOn": "",
+  "deletionTimestamp": "",
+  "blocked": false,
+  "deleted": false,
+  "isOnline": true
 }
-````
 
-## *Прием UUID от сервиса Dialogs через Webclient о завершении сессии вебсокета у аккаунта: как флаг перехода в статус
-offline*
+🔄 Управление статусами аккаунта
+▶ Пометить аккаунт как удалённый по ID
+DELETE /api/v1/account/{id}
 
-[//]: # (operationId: receiveUUIDFromPath)
+▶ Заблокировать аккаунт
+PATCH /api/v1/account/{id}
 
-### POST
+▶ Установить статус "offline" (уведомление от Dialogs)
+POST /api/v1/account/lastAction/{id}
+Path: id = UUID
 
-## /api/v1/account/lastAction/{id}
+📊 Статистика
+▶ Получить общее количество аккаунтов (для Telegram-бота)
+GET /api/v1/account/total
 
-### PathVariable
+🔍 Поиск
+▶ Глобальный поиск аккаунтов
+GET /api/v1/account/search
+Body:
 
-- id: "String" (UUID)
-
-## *Получение аккаунта по ID*
-
-[//]: # (operationId: getAccountById)
-
-### GET
-
-## /api/v1/account/{id}
-
-### PathVariable
-
-- id: "String" (UUID)
-
-## *Пометить аккаунт как удалённый по ID*
-
-[//]: # (operationId: markAccountAsDeletedById)
-
-### DELETE
-
-## /api/v1/account/{id}
-
-### PathVariable
-
-- id: "String" (UUID)
-
-## *Пометить аккаунт как заблокированный по ID*
-
-[//]: # (operationId: markAccountAsBlockedById)
-
-### PATCH
-
-## /api/v1/account/{id}
-
-### PathVariable
-
-- id: "String" (UUID)
-
-## *Получение общего количества аккаунтов для telegram-бота*
-
-[//]: # (operationId: getTotalAccountsCount)
-
-### GET
-
-## /api/v1/account/total
-
-## *Глобальный поиск аккаунта по ключевым словам*
-
-[//]: # (operationId: searchAccounts)
-
-### GET
-
-## /api/v1/account/search
-
-### RequestBody
-
-````json
+json
 {
-"author": "",
-"ids": [],
-"firstName": "",
-"lastName": "",
-"ageTo": 0,
-"ageFrom": 0,
-"country": "",
-"city": "",
-"statusCode": "FRIEND",
-"isDeleted": false
+  "author": "",
+  "ids": [],
+  "firstName": "",
+  "lastName": "",
+  "ageTo": 0,
+  "ageFrom": 0,
+  "country": "",
+  "city": "",
+  "statusCode": "FRIEND",
+  "isDeleted": false
 }
-````
+Params:
 
-### RequestParam
+pageSize (пример: 3)
 
-- pageSize: 3
-- pageNumber: 0
+pageNumber (пример: 0)
 
-## *Поиск аккаунта по статус-коду отношений в микросервисе Friends. Этот контроллер ссылается на глобальный поиск
-аккаунтов /search, так как в нем учтен statusCode.*
+▶ Поиск по статус-коду отношений
+GET /api/v1/account/search/statusCode
+Params:
 
-[//]: # (operationId: searchByStatusCode)
+statusCode=FRIEND
 
-### GET
+pageSize=0
 
-## /api/v1/account/search/statusCode
+pageNumber=0
 
-### RequestParam
+Контроллер использует глобальный поиск (/search), расширяя его обработкой statusCode.
 
-- statusCode: FRIEND
-- pageSize: 0
-- pageNumber: 0
+🧩 Примечания
+Сервис реализует интеграции через WebClient.
+
+Статусы онлайн/офлайн синхронизируются с микросервисом Dialogs.
+
+Поддерживаются мягкое удаление и блокировка аккаунтов.
